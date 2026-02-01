@@ -10,15 +10,13 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
-from pathlib import Path
-import os
-import importlib
-import environ
 import datetime
-import sys
+import os
+from pathlib import Path
+
+import environ
+
 from . import monitoring
-
-
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -71,6 +69,9 @@ THIRD_PARTY_APPS = [
     "social_django",
     "whitenoise",
     "channels",
+    # Added Packages
+    "corsheaders",
+    "drf_standardized_errors",
 ]
 
 INSTALLED_APPS = [
@@ -83,9 +84,11 @@ INSTALLED_APPS = [
     "apps.users",
     "apps.websockets",
     *DJANGO_CORE_APPS,
-    *THIRD_PARTY_APPS,    
+    *THIRD_PARTY_APPS,
 ]
 
+if DEBUG:
+    INSTALLED_APPS += ["debug_toolbar"]
 
 
 MIDDLEWARE = [
@@ -98,6 +101,10 @@ MIDDLEWARE = [
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "corsheaders.middleware.CorsMiddleware",  # CORS Middleware
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -108,21 +115,24 @@ MIDDLEWARE = [
     "social_django.middleware.SocialAuthExceptionMiddleware",
 ]
 
+if DEBUG:
+    MIDDLEWARE += ["debug_toolbar.middleware.DebugToolbarMiddleware"]
+
 ROOT_URLCONF = "config.urls_api"
 ROOT_HOSTCONF = "config.hosts"
 DEFAULT_HOST = "api"
-PARENT_HOST = env('PARENT_HOST', default="")
+PARENT_HOST = env("PARENT_HOST", default="")
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
@@ -130,32 +140,32 @@ TEMPLATES = [
 PASSWORD_HASHERS = env.list(
     "DJANGO_PASSWORD_HASHERS",
     default=[
-        'django.contrib.auth.hashers.PBKDF2PasswordHasher',
-        'django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher',
-        'django.contrib.auth.hashers.Argon2PasswordHasher',
-        'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
+        "django.contrib.auth.hashers.PBKDF2PasswordHasher",
+        "django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher",
+        "django.contrib.auth.hashers.Argon2PasswordHasher",
+        "django.contrib.auth.hashers.BCryptSHA256PasswordHasher",
     ],
 )
 
-WSGI_APPLICATION = 'config.wsgi.application'
+WSGI_APPLICATION = "config.wsgi.application"
 
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
         },
     },
-    'root': {
-        'handlers': ['console'],
-        'level': env('DJANGO_LOG_LEVEL', default='INFO'),
+    "root": {
+        "handlers": ["console"],
+        "level": env("DJANGO_LOG_LEVEL", default="INFO"),
     },
-    'loggers': {
-        '*': {
-            'handlers': ['console'],
-            'level': env('DJANGO_LOG_LEVEL', default='INFO'),
-            'propagate': False,
+    "loggers": {
+        "*": {
+            "handlers": ["console"],
+            "level": env("DJANGO_LOG_LEVEL", default="INFO"),
+            "propagate": False,
         },
     },
 }
@@ -172,14 +182,14 @@ if IS_LOCAL_DEBUG:
             "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
         }
     }
-    
+
     # Use in-memory channel layer for local development
     CHANNEL_LAYERS = {
         "default": {
             "BACKEND": "channels.layers.InMemoryChannelLayer",
         },
     }
-    
+
     # Use local memory cache for local development
     CACHES = {
         "default": {
@@ -187,7 +197,7 @@ if IS_LOCAL_DEBUG:
             "LOCATION": "unique-snowflake",
         }
     }
-    
+
     REDIS_CONNECTION = None
 else:
     # Use PostgreSQL for production
@@ -227,16 +237,16 @@ else:
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
@@ -247,7 +257,7 @@ AUTHENTICATION_BACKENDS = (
 )
 
 # Add custom user model as the default user model
-AUTH_USER_MODEL = 'users.User'
+AUTH_USER_MODEL = "users.User"
 # OR if you have imported the model
 # from user_management.models import User
 # AUTH_USER_MODEL = User
@@ -255,9 +265,9 @@ AUTH_USER_MODEL = 'users.User'
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "UTC"
 
 USE_I18N = True
 
@@ -271,17 +281,33 @@ LOGOUT_REDIRECT_URL = "users:login"
 
 # Django REST Framework settings
 REST_FRAMEWORK = {
-    "EXCEPTION_HANDLER": "core.utils.custom_exception_handler",
+    "EXCEPTION_HANDLER": "drf_standardized_errors.handler.exception_handler",
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "apps.users.authentication.JSONWebTokenCookieAuthentication",
         "rest_framework_simplejwt.authentication.JWTAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ),
+    "DEFAULT_RENDERER_CLASSES": (
+        "djangorestframework_camel_case.render.CamelCaseJSONRenderer",
+        "djangorestframework_camel_case.render.CamelCaseBrowsableAPIRenderer",
+    ),
+    "DEFAULT_PARSER_CLASSES": (
+        "djangorestframework_camel_case.parser.CamelCaseFormParser",
+        "djangorestframework_camel_case.parser.CamelCaseMultiPartParser",
+        "djangorestframework_camel_case.parser.CamelCaseJSONParser",
+    ),
     "DEFAULT_THROTTLE_RATES": {"anon": "100/day"},
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10,
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 10,
 }
+
+# CORS Settings
+CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=["http://localhost:3000"])
+CORS_ALLOW_CREDENTIALS = True
+
+# Standardized Errors Settings
+DRF_STANDARDIZED_ERRORS = {"ENABLE_IN_DEBUG_FOR_UNHANDLED_EXCEPTIONS": True}
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": datetime.timedelta(minutes=env.int("ACCESS_TOKEN_LIFETIME_MINUTES", default=5)),
@@ -324,7 +350,7 @@ SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {
 }
 SOCIAL_AUTH_LOGIN_ERROR_URL = "/"
 SOCIAL_AUTH_FIELDS_STORED_IN_SESSION = ["locale"]
-SOCIAL_AUTH_URL_NAMESPACE = 'users_api:social'
+SOCIAL_AUTH_URL_NAMESPACE = "users_api:social"
 
 SWAGGER_SETTINGS = {
     "DEFAULT_INFO": "config.urls_api.api_info",
@@ -361,7 +387,7 @@ STRIPE_CHECKS_ENABLED = env.bool("STRIPE_CHECKS_ENABLED", default=True)
 if not STRIPE_CHECKS_ENABLED:
     SILENCED_SYSTEM_CHECKS.extend(["djstripe.C001", "djstripe.I001", "djstripe.I002"])
 
-STRIPE_ENABLED = '<CHANGE_ME>' not in STRIPE_LIVE_SECRET_KEY or '<CHANGE_ME>' not in STRIPE_TEST_SECRET_KEY
+STRIPE_ENABLED = "<CHANGE_ME>" not in STRIPE_LIVE_SECRET_KEY or "<CHANGE_ME>" not in STRIPE_TEST_SECRET_KEY
 
 SUBSCRIPTION_TRIAL_PERIOD_DAYS = env("SUBSCRIPTION_TRIAL_PERIOD_DAYS", default=7)
 
@@ -374,8 +400,8 @@ AWS_EXPORTS_STORAGE_BUCKET_NAME = env("AWS_EXPORTS_STORAGE_BUCKET_NAME", default
 AWS_S3_ENDPOINT_URL = AWS_ENDPOINT_URL
 AWS_S3_CUSTOM_DOMAIN = env("AWS_S3_CUSTOM_DOMAIN", default=None)
 AWS_QUERYSTRING_EXPIRE = env("AWS_QUERYSTRING_EXPIRE", default=60 * 60 * 24)
-AWS_CLOUDFRONT_KEY = os.environ.get('AWS_CLOUDFRONT_KEY', '').encode('ascii')
-AWS_CLOUDFRONT_KEY_ID = os.environ.get('AWS_CLOUDFRONT_KEY_ID', None)
+AWS_CLOUDFRONT_KEY = os.environ.get("AWS_CLOUDFRONT_KEY", "").encode("ascii")
+AWS_CLOUDFRONT_KEY_ID = os.environ.get("AWS_CLOUDFRONT_KEY_ID", None)
 USER_DATA_EXPORT_EXPIRY_SECONDS = env.int("USER_DATA_EXPORT_EXPIRY_SECONDS", 172800)  # 2 days default
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
@@ -384,8 +410,8 @@ CSRF_TRUSTED_ORIGINS = env("CSRF_TRUSTED_ORIGINS", default=[])
 RATELIMIT_IP_META_KEY = "core.utils.get_client_ip"
 
 OTP_AUTH_ISSUER_NAME = env("OTP_AUTH_ISSUER_NAME", default="")
-OTP_AUTH_TOKEN_COOKIE = 'otp_auth_token'
-OTP_AUTH_TOKEN_LIFETIME_MINUTES = datetime.timedelta(minutes=env.int('OTP_AUTH_TOKEN_LIFETIME_MINUTES', default=5))
+OTP_AUTH_TOKEN_COOKIE = "otp_auth_token"
+OTP_AUTH_TOKEN_LIFETIME_MINUTES = datetime.timedelta(minutes=env.int("OTP_AUTH_TOKEN_LIFETIME_MINUTES", default=5))
 OTP_VALIDATE_PATH = "/auth/validate-otp"
 
 OPENAI_API_KEY = env("OPENAI_API_KEY", default="")
@@ -396,20 +422,20 @@ USER_DOCUMENTS_NUMBER_LIMIT = env.int("USER_DOCUMENTS_NUMBER_LIMIT", default=10)
 TENANT_INVITATION_TIMEOUT = env("TENANT_INVITATION_TIMEOUT", default=60 * 60 * 24 * 14)
 
 # Celery Configuration
-CELERY_RESULT_BACKEND = 'django-db'
+CELERY_RESULT_BACKEND = "django-db"
 if IS_LOCAL_DEBUG:
     # Use synchronous task execution for local development (no broker needed)
     CELERY_TASK_ALWAYS_EAGER = True
     CELERY_TASK_EAGER_PROPAGATES = True
-    CELERY_BROKER_URL = 'memory://'
+    CELERY_BROKER_URL = "memory://"
     # Print emails to console for local development
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 else:
     CELERY_BROKER_URL = f'{env("REDIS_CONNECTION")}/0'
     EMAIL_BACKEND = env("EMAIL_BACKEND", default="django_ses.SESBackend")
 
 CELERY_BROKER_TRANSPORT_OPTIONS = {
-    'visibility_timeout': 3600,
+    "visibility_timeout": 3600,
 }
 
 
@@ -432,14 +458,14 @@ else:
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_URL = "static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 # Custom error handlers
-handler400 = 'core.views.custom_400_view'
-handler403 = 'core.views.custom_403_view'
-handler404 = 'core.views.custom_404_view'
-handler500 = 'core.views.custom_500_view'
+handler400 = "core.views.custom_400_view"
+handler403 = "core.views.custom_403_view"
+handler404 = "core.views.custom_404_view"
+handler500 = "core.views.custom_500_view"
 
 AWS_SES_REGION_NAME = env("AWS_SES_REGION_NAME", default=AWS_REGION)
 
@@ -447,11 +473,10 @@ AWS_SES_REGION_NAME = env("AWS_SES_REGION_NAME", default=AWS_REGION)
 USE_SES_V2 = True
 
 # Django Tailwind Configuration
-TAILWIND_APP_NAME = 'theme'
+TAILWIND_APP_NAME = "theme"
 INTERNAL_IPS = [
     "127.0.0.1",
 ]
 
 # NPM executable path (for django-tailwind)
 NPM_BIN_PATH = env("NPM_BIN_PATH", default="/usr/local/bin/npm")
-

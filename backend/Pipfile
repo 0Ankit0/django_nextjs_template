@@ -12,9 +12,9 @@ drf-spectacular = "*"                       # Automatic OpenAPI schema and docum
 django-tailwind = "*"                       # Integration of Tailwind CSS with Django
 django-hashid-field = "*"                   # Hashids for Django models
 django-environ = "*"                        # Environment variables management for Django
-pillow = "*"                                # Image processing library for handling image uploads    
+pillow = "*"                                # Image processing library for handling image uploads
 boto3 = "*"                                 # AWS SDK for Python, used with django-storages for S3
-channels = "*"                              # Django Channels for handling WebSockets and asynchronous tasks    
+channels = "*"                              # Django Channels for handling WebSockets and asynchronous tasks
 setuptools = "*"                            # Package development and distribution utilities
 celery = "*"                                # Distributed task queue for running background tasks
 django-celery-results = "*"                 # Results backend for Celery
@@ -45,12 +45,17 @@ pytest-django = "*"                         # Django integration for pytest
 pytest-cov = "*"                            # Coverage reporting for pytest
 pytest-factoryboy = "*"                     # Factory Boy integration for pytest
 moto = "*"                                  # Mocking library for AWS services in tests
+django-cors-headers = "*"                   # CORS headers for Django that allows cross-origin requests
+drf-nested-routers = "*"                    # Nested routers for DRF that allows nested routes
+djangorestframework-camel-case = "*"        # Camel case for DRF that converts snake_case to camelCase
+drf-standardized-errors = "*"               # Standardized errors for DRF that allows standardized errors
 
 [dev-packages]
 ruff = "*"                                  # Fast Python linter and formatter
 mypy = "*"                                  # Static type checker for Python
 django-stubs = "*"                          # Type hints for Django
 pre-commit = "*"                            # Framework for managing pre-commit hooks
+django-debug-toolbar = "*"                  # Debug toolbar for Django
 
 [requires]
 python_version = "3.14"
