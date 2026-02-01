@@ -1,4 +1,4 @@
-from apps.multitenancy.constants import TenantUserRole
+from multitenancy.constants import TenantUserRole
 
 
 def make_statement(action, effect, principal, condition=None):
@@ -14,7 +14,7 @@ def make_statement(action, effect, principal, condition=None):
     return statement
 
 
-class CommonGroups:
+class commonGroups:
     Admin = "admin"
     User = "user"
 

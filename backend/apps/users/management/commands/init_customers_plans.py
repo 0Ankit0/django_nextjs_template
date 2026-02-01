@@ -1,7 +1,6 @@
 from django.core.management.base import BaseCommand
-
-from apps.finances.services import subscriptions
-from apps.multitenancy.models import Tenant
+from finances.services import subscriptions
+from multitenancy.models import Tenant
 
 
 class Command(BaseCommand):

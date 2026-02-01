@@ -41,7 +41,7 @@ services:
     build:
       context: ../django-template-backend
       dockerfile: Dockerfile
-    command: celery -A apps.tasks worker -l info
+    command: celery -A tasks worker -l info
     environment:
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY:-change-me-in-production}
       - DB_CONNECTION={"dbname":"ecommerce","username":"postgres","password":"postgres","host":"db","port":"5432"}
@@ -59,7 +59,7 @@ services:
     build:
       context: ../django-template-backend
       dockerfile: Dockerfile
-    command: celery -A apps.tasks beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    command: celery -A tasks beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     environment:
       - DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY:-change-me-in-production}
       - DB_CONNECTION={"dbname":"ecommerce","username":"postgres","password":"postgres","host":"db","port":"5432"}

@@ -11,9 +11,7 @@ pytestmark = pytest.mark.django_db
 
 class TestCreateTenantInvitationSerializer:
     def test_create_invitation_existing_user(self, mocker, user, user_factory, tenant_factory):
-        make_token = mocker.patch(
-            "apps.multitenancy.tokens.TenantInvitationTokenGenerator.make_token", return_value="token"
-        )
+        make_token = mocker.patch("multitenancy.tokens.TenantInvitationTokenGenerator.make_token", return_value="token")
         creator = user_factory()
 
         tenant = tenant_factory(name="Test Tenant", type=TenantType.ORGANIZATION)
@@ -37,9 +35,7 @@ class TestCreateTenantInvitationSerializer:
         make_token.assert_called_once()
 
     def test_create_invitation_new_user(self, mocker, user_factory, tenant_factory):
-        make_token = mocker.patch(
-            "apps.multitenancy.tokens.TenantInvitationTokenGenerator.make_token", return_value="token"
-        )
+        make_token = mocker.patch("multitenancy.tokens.TenantInvitationTokenGenerator.make_token", return_value="token")
         creator = user_factory()
         tenant = tenant_factory(name="Test Tenant", type=TenantType.ORGANIZATION)
 

@@ -1,4 +1,4 @@
-from common.exceptions import DomainException
+from core.exceptions import DomainException
 
 
 class UserOrCustomerNotDefined(DomainException):

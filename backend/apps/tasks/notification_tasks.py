@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 @shared_task
 def create_notification(user_id: int, notification_type: str, data: dict = None):
     """Create a notification and send it via WebSocket."""
-    from apps.notifications.models import Notification
+    from notifications.models import Notification
 
     try:
         notification = Notification.objects.create(
@@ -46,7 +46,7 @@ def create_notification(user_id: int, notification_type: str, data: dict = None)
 @shared_task
 def send_scheduled_notifications():
     """Send all scheduled notifications that are due."""
-    from apps.notifications.models import ScheduledNotification
+    from notifications.models import ScheduledNotification
 
     now = timezone.now()
     due_notifications = ScheduledNotification.objects.filter(scheduled_for__lte=now, sent=False)
@@ -66,8 +66,8 @@ def send_scheduled_notifications():
 @shared_task
 def broadcast_notification(notification_type: str, data: dict = None, tenant_id: str = None):
     """Broadcast a notification to all users or all users in a tenant."""
-    from apps.multitenancy.models import TenantMembership
-    from apps.users.models import User
+    from multitenancy.models import TenantMembership
+    from users.models import User
 
     if tenant_id:
         user_ids = TenantMembership.objects.filter(tenant_id=tenant_id, is_active=True).values_list(
@@ -88,7 +88,7 @@ def mark_old_notifications_read(user_id: int, days: int = 30):
     """Mark notifications older than specified days as read."""
     from datetime import timedelta
 
-    from apps.notifications.models import Notification
+    from notifications.models import Notification
 
     cutoff_date = timezone.now() - timedelta(days=days)
 

@@ -27,7 +27,7 @@ ws.onmessage = (event) => {
 
 ## Send from REST API
 ```python
-from apps.websockets.utils import send_user_notification
+from websockets.utils import send_user_notification
 
 # In your REST view
 send_user_notification(

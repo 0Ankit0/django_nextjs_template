@@ -5,9 +5,9 @@ from django.utils import timezone
 from rest_framework.exceptions import ErrorDetail, ValidationError
 from rest_framework_simplejwt.tokens import AccessToken
 
-from apps.users.exceptions import OTPVerificationFailure
-from apps.users.serializers import ValidateOTPSerializer
 from config import settings
+from users.exceptions import OTPVerificationFailure
+from users.serializers import ValidateOTPSerializer
 
 pytestmark = pytest.mark.django_db
 

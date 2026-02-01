@@ -4,34 +4,31 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('djstripe', '0002_2_10'),
+        ("djstripe", "0002_2_10"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Price',
-            fields=[
-            ],
+            name="Price",
+            fields=[],
             options={
-                'proxy': True,
-                'indexes': [],
-                'constraints': [],
+                "proxy": True,
+                "indexes": [],
+                "constraints": [],
             },
-            bases=('djstripe.price',),
+            bases=("djstripe.price",),
         ),
         migrations.CreateModel(
-            name='Product',
-            fields=[
-            ],
+            name="Product",
+            fields=[],
             options={
-                'proxy': True,
-                'indexes': [],
-                'constraints': [],
+                "proxy": True,
+                "indexes": [],
+                "constraints": [],
             },
-            bases=('djstripe.product',),
+            bases=("djstripe.product",),
         ),
     ]

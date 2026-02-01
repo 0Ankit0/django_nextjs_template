@@ -78,7 +78,7 @@ class TestSubscriptionScheduleRelease:
 
 
 class TestSendSubscriptionErrorEmail:
-    @patch("common.emails.send_email")
+    @patch("coreemails.send_email")
     def test_send_email_on_invoice_payment_failed(self, send_email, webhook_event_factory, subscription):
         webhook_event = webhook_event_factory(
             type="invoice.payment_failed",
@@ -97,7 +97,7 @@ class TestSendSubscriptionErrorEmail:
             (subscription.customer.subscriber.email, notifications.SubscriptionErrorEmail.name, None)
         )
 
-    @patch("common.emails.send_email")
+    @patch("coreemails.send_email")
     def test_send_email_on_invoice_payment_required(self, send_email, webhook_event_factory, subscription):
         webhook_event = webhook_event_factory(
             type="invoice.payment_action_required",
@@ -118,7 +118,7 @@ class TestSendSubscriptionErrorEmail:
 
 
 class TestSendTrialExpiresSoonEmail:
-    @patch("common.emails.send_email")
+    @patch("coreemails.send_email")
     def test_previously_trialing_subscription_is_canceled(self, send_email, webhook_event_factory, customer):
         webhook_event = webhook_event_factory(
             type="customer.subscription.trial_will_end",

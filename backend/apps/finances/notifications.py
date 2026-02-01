@@ -1,6 +1,6 @@
 import logging
 
-from common import emails
+from core import emails
 
 from . import email_serializers
 

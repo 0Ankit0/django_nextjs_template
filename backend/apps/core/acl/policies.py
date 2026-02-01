@@ -1,14 +1,14 @@
 from rest_access_policy import AccessPolicy
 
-from .helpers import Action, CommonGroups, Effect, Principal, TenantRoles, make_statement
+from .helpers import Action, Effect, Principal, TenantRoles, commonGroups, make_statement
 
 
 class AdminFullAccess(AccessPolicy):
-    statements = [make_statement(principal=Principal.group(CommonGroups.Admin), action=Action.Any, effect=Effect.Allow)]
+    statements = [make_statement(principal=Principal.group(commonGroups.Admin), action=Action.Any, effect=Effect.Allow)]
 
 
 class UserFullAccess(AccessPolicy):
-    statements = [make_statement(principal=Principal.group(CommonGroups.User), action=Action.Any, effect=Effect.Allow)]
+    statements = [make_statement(principal=Principal.group(commonGroups.User), action=Action.Any, effect=Effect.Allow)]
 
 
 class IsAnonymousFullAccess(AccessPolicy):

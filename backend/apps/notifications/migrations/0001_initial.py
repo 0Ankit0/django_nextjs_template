@@ -5,45 +5,66 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Notification',
+            name="Notification",
             fields=[
-                ('id', hashid_field.field.HashidAutoField(alphabet='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890', min_length=7, prefix='', primary_key=True, serialize=False)),
-                ('type', models.CharField(max_length=64)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('read_at', models.DateTimeField(blank=True, null=True)),
-                ('data', models.JSONField(default=dict)),
+                (
+                    "id",
+                    hashid_field.field.HashidAutoField(
+                        alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
+                        min_length=7,
+                        prefix="",
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("type", models.CharField(max_length=64)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("read_at", models.DateTimeField(blank=True, null=True)),
+                ("data", models.JSONField(default=dict)),
             ],
         ),
         migrations.CreateModel(
-            name='NotificationPreference',
+            name="NotificationPreference",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('notification_type', models.CharField(max_length=64)),
-                ('channel', models.CharField(choices=[('email', 'Email'), ('push', 'Push Notification'), ('in_app', 'In-App')], max_length=20)),
-                ('enabled', models.BooleanField(default=True)),
+                ("id", models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name="ID")),
+                ("notification_type", models.CharField(max_length=64)),
+                (
+                    "channel",
+                    models.CharField(
+                        choices=[("email", "Email"), ("push", "Push Notification"), ("in_app", "In-App")], max_length=20
+                    ),
+                ),
+                ("enabled", models.BooleanField(default=True)),
             ],
         ),
         migrations.CreateModel(
-            name='ScheduledNotification',
+            name="ScheduledNotification",
             fields=[
-                ('id', hashid_field.field.HashidAutoField(alphabet='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890', min_length=7, prefix='', primary_key=True, serialize=False)),
-                ('type', models.CharField(max_length=64)),
-                ('data', models.JSONField(default=dict)),
-                ('scheduled_for', models.DateTimeField()),
-                ('sent', models.BooleanField(default=False)),
-                ('sent_at', models.DateTimeField(blank=True, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
+                (
+                    "id",
+                    hashid_field.field.HashidAutoField(
+                        alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
+                        min_length=7,
+                        prefix="",
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("type", models.CharField(max_length=64)),
+                ("data", models.JSONField(default=dict)),
+                ("scheduled_for", models.DateTimeField()),
+                ("sent", models.BooleanField(default=False)),
+                ("sent_at", models.DateTimeField(blank=True, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
             ],
             options={
-                'ordering': ['scheduled_for'],
+                "ordering": ["scheduled_for"],
             },
         ),
     ]

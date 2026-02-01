@@ -8,8 +8,8 @@ logger = logging.getLogger(__name__)
 @shared_task
 def sync_content():
     """Synchronize content from external CMS (Contentful)."""
-    from apps.content.models import ContentItem
-    from apps.integrations.services.contentful_service import ContentfulService
+    from content.models import ContentItem
+    from integrations.services.contentful_service import ContentfulService
 
     logger.info("Starting content synchronization")
 
@@ -43,7 +43,7 @@ def sync_content():
 @shared_task
 def process_uploaded_document(document_id: int):
     """Process an uploaded document (extract text, generate thumbnails, etc.)."""
-    from apps.content.models import Document
+    from content.models import Document
 
     logger.info(f"Processing document {document_id}")
 
@@ -76,9 +76,8 @@ def process_uploaded_document(document_id: int):
 @shared_task
 def generate_sitemap():
     """Generate sitemap for SEO."""
+    from content.models import ContentItem
     from django.conf import settings
-
-    from apps.content.models import ContentItem
 
     logger.info("Generating sitemap")
 

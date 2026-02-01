@@ -6,10 +6,10 @@ from django.contrib.auth import hashers
 from django.contrib.auth.models import Group
 from django.core.files.uploadedfile import SimpleUploadedFile, UploadedFile
 from djstripe.models import Customer
+from multitenancy.models import Tenant
+from multitenancy.tests.factories import TenantFactory
 
-from apps.multitenancy.models import Tenant
-from apps.multitenancy.tests.factories import TenantFactory
-from common.acl.helpers import CommonGroups
+from core.acl.helpers import commonGroups
 
 
 class GroupFactory(factory.django.DjangoModelFactory):
@@ -26,11 +26,11 @@ class UserFactory(factory.django.DjangoModelFactory):
 
     email = factory.Faker("email")
     is_superuser = False
-    profile = factory.RelatedFactory("apps.users.tests.factories.UserProfileFactory", factory_related_name="user")
+    profile = factory.RelatedFactory("users.tests.factories.UserProfileFactory", factory_related_name="user")
 
     class Params:
         has_avatar = factory.Trait(
-            profile__avatar=factory.SubFactory("apps.users.tests.factories.UserAvatarFactory"),
+            profile__avatar=factory.SubFactory("users.tests.factories.UserAvatarFactory"),
         )
 
     @classmethod
@@ -46,7 +46,7 @@ class UserFactory(factory.django.DjangoModelFactory):
         if not create:
             return
 
-        group_names = extracted or [CommonGroups.User]
+        group_names = extracted or [commonGroups.User]
         self.groups.add(*[Group.objects.get_or_create(name=group_name)[0] for group_name in group_names])
 
     @factory.post_generation
@@ -61,7 +61,7 @@ class UserFactory(factory.django.DjangoModelFactory):
         if extracted is None:
             return
 
-        user_group, created = Group.objects.get_or_create(name=CommonGroups.Admin)
+        user_group, created = Group.objects.get_or_create(name=commonGroups.Admin)
         self.groups.add(user_group)
 
 

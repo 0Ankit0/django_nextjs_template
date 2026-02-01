@@ -1,8 +1,14 @@
+from django.conf import settings
 from django.urls import include, path, re_path
 from drf_yasg import openapi
 from drf_yasg.generators import OpenAPISchemaGenerator
 from drf_yasg.views import get_schema_view
 from rest_framework import permissions
+
+try:
+    import debug_toolbar
+except ImportError:
+    debug_toolbar = None
 
 api_info = openapi.Info(
     title="Django Template Backend API",
@@ -34,27 +40,23 @@ urlpatterns = [
         include(
             [
                 # Authentication & User Management (single include to avoid namespace conflicts)
-                path("", include("apps.users.urls")),
+                path("", include("users.urls")),
                 # Multi-tenancy
-                path("tenants/", include("apps.multitenancy.urls")),
+                path("tenants/", include("multitenancy.urls")),
                 # Notifications
-                path("", include("apps.notifications.urls")),
+                path("", include("notifications.urls")),
                 # Finances & Subscriptions
-                path("finances/", include("apps.finances.urls")),
+                path("finances/", include("finances.urls")),
                 # Content Management (Contentful CMS)
-                path("content/", include("apps.content.urls")),
+                path("content/", include("content.urls")),
                 # Integrations (OpenAI)
-                path("integrations/", include("apps.integrations.urls")),
+                path("integrations/", include("integrations.urls")),
             ]
         ),
     ),
 ]
 
-from django.conf import settings
-
 if settings.DEBUG:
-    import debug_toolbar
-
     urlpatterns += [
         path("__debug__/", include(debug_toolbar.urls)),
     ]

@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404, redirect
 from djstripe import models as djstripe_models
 from rest_framework import renderers, response, status, views
 
-from common.acl import policies
+from core.acl import policies
 
 from . import serializers
 

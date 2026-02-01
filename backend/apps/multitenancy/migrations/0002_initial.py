@@ -6,46 +6,71 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('multitenancy', '0001_initial'),
+        ("multitenancy", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='tenant',
-            name='creator',
+            model_name="tenant",
+            name="creator",
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
-            model_name='tenantmembership',
-            name='creator',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='created_tenant_memberships', to=settings.AUTH_USER_MODEL),
+            model_name="tenantmembership",
+            name="creator",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                related_name="created_tenant_memberships",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='tenantmembership',
-            name='tenant',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='user_memberships', to='multitenancy.tenant'),
+            model_name="tenantmembership",
+            name="tenant",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, related_name="user_memberships", to="multitenancy.tenant"
+            ),
         ),
         migrations.AddField(
-            model_name='tenantmembership',
-            name='user',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='tenant_memberships', to=settings.AUTH_USER_MODEL),
+            model_name="tenantmembership",
+            name="user",
+            field=models.ForeignKey(
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="tenant_memberships",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='tenant',
-            name='members',
-            field=models.ManyToManyField(blank=True, related_name='tenants', through='multitenancy.TenantMembership', through_fields=('tenant', 'user'), to=settings.AUTH_USER_MODEL),
+            model_name="tenant",
+            name="members",
+            field=models.ManyToManyField(
+                blank=True,
+                related_name="tenants",
+                through="multitenancy.TenantMembership",
+                through_fields=("tenant", "user"),
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddConstraint(
-            model_name='tenantmembership',
-            constraint=models.UniqueConstraint(condition=models.Q(('user__isnull', False)), fields=('user', 'tenant'), name='unique_non_null_user_and_tenant'),
+            model_name="tenantmembership",
+            constraint=models.UniqueConstraint(
+                condition=models.Q(("user__isnull", False)),
+                fields=("user", "tenant"),
+                name="unique_non_null_user_and_tenant",
+            ),
         ),
         migrations.AddConstraint(
-            model_name='tenantmembership',
-            constraint=models.UniqueConstraint(condition=models.Q(('invitee_email_address__exact', ''), _negated=True), fields=('invitee_email_address', 'tenant'), name='unique_non_null_user_and_invitee_email_address'),
+            model_name="tenantmembership",
+            constraint=models.UniqueConstraint(
+                condition=models.Q(("invitee_email_address__exact", ""), _negated=True),
+                fields=("invitee_email_address", "tenant"),
+                name="unique_non_null_user_and_invitee_email_address",
+            ),
         ),
     ]

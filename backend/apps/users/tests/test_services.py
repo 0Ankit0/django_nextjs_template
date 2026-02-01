@@ -8,10 +8,10 @@ from unittest.mock import call
 import boto3
 import pytest
 from django.conf import settings
-from moto import mock_s3
+from moto import mock_aws
 
-from apps.users.exceptions import OTPVerificationFailure
-from apps.users.models import User
+from users.exceptions import OTPVerificationFailure
+from users.models import User
 from utils import hashid
 
 from ..services.export.services.export import ExportUserArchive
@@ -88,7 +88,7 @@ class TestExportUserArchive:
         data = export_user_archive._export_user_files()
         assert document.file in data
 
-    @mock_s3
+    @mock_aws
     def test_zip_archive_is_created(self, user, document_demo_item_factory, mocked_zip_file, export_user_archive):
         s3 = boto3.client("s3", region_name="us-east-1", endpoint_url=settings.AWS_S3_ENDPOINT_URL)
         s3.create_bucket(Bucket=settings.AWS_EXPORTS_STORAGE_BUCKET_NAME)

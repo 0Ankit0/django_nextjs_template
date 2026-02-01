@@ -1,11 +1,11 @@
 import hashid_field
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Group, PermissionsMixin
 from django.db import models
+from multitenancy.models import TenantMembership
 
-from apps.multitenancy.models import TenantMembership
-from common.acl.helpers import CommonGroups
-from common.models import ImageWithThumbnailMixin
-from common.storages import PublicS3Boto3StorageWithCDN, UniqueFilePathGenerator
+from core.acl.helpers import commonGroups
+from core.models import ImageWithThumbnailMixin
+from core.storages import PublicS3Boto3StorageWithCDN, UniqueFilePathGenerator
 
 
 class UserManager(BaseUserManager):
@@ -18,7 +18,7 @@ class UserManager(BaseUserManager):
             email=normalized_email,
         )
         user.set_password(password)
-        user_group = Group.objects.get(name=CommonGroups.User)
+        user_group = Group.objects.get(name=commonGroups.User)
         user.save(using=self._db)
 
         user.groups.add(user_group)
@@ -40,7 +40,7 @@ class UserManager(BaseUserManager):
         return user
 
     def filter_admins(self):
-        return self.filter(groups__name=CommonGroups.Admin)
+        return self.filter(groups__name=commonGroups.Admin)
 
 
 class User(AbstractBaseUser, PermissionsMixin):
@@ -64,6 +64,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = "email"
+
+    class Meta:
+        app_label = "users"
 
     def __str__(self) -> str:
         return self.email

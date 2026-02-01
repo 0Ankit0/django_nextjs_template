@@ -11,13 +11,13 @@ from storages.backends.s3boto3 import S3Boto3Storage
 pytest_plugins = [
     "celery.contrib.pytest",
     "tests.aws_fixtures",
-    "common.tests.fixtures",
-    "apps.users.tests.fixtures",
-    "apps.finances.tests.fixtures",
-    "apps.content.tests.fixtures",
-    "apps.notifications.tests.fixtures",
-    "apps.integrations.tests.fixtures",
-    "apps.multitenancy.tests.fixtures",
+    "core.tests.fixtures",
+    "users.tests.fixtures",
+    "finances.tests.fixtures",
+    "content.tests.fixtures",
+    "notifications.tests.fixtures",
+    "integrations.tests.fixtures",
+    "multitenancy.tests.fixtures",
 ]
 
 
@@ -45,13 +45,16 @@ def storage(mocker):
     with mock_aws():
         storage = S3Boto3Storage()
         session = boto3.session.Session()
-        with patch(
-            "storages.backends.s3boto3.S3Boto3Storage.connection",
-            new_callable=PropertyMock,
-        ) as mock_connection_property, patch(
-            "storages.backends.s3boto3.S3Boto3Storage.bucket",
-            new_callable=PropertyMock,
-        ) as mock_bucket_property:
+        with (
+            patch(
+                "storages.backends.s3boto3.S3Boto3Storage.connection",
+                new_callable=PropertyMock,
+            ) as mock_connection_property,
+            patch(
+                "storages.backends.s3boto3.S3Boto3Storage.bucket",
+                new_callable=PropertyMock,
+            ) as mock_bucket_property,
+        ):
 
             @lru_cache(None)
             def get_connection():

@@ -1,8 +1,8 @@
-import openai.error
 import pytest
+from openai import OpenAIError
 
-from apps.integrations.openai.client import OPEN_AI_API_ERROR_MSG, OpenAIClient
-from apps.integrations.openai.exceptions import OpenAIClientException
+from integrations.openai.client import OPEN_AI_API_ERROR_MSG, OpenAIClient
+from integrations.openai.exceptions import OpenAIClientException
 
 pytestmark = pytest.mark.django_db
 
@@ -41,9 +41,7 @@ class TestOpenAIClientGetSaasIdeas:
         assert result.usage.dict() == response_data["usage"]
 
     def test_api_exception(self, mocker, openai_completion_mock):
-        create_mock = mocker.Mock(
-            side_effect=openai.error.APIError("The server had an error while processing your request.")
-        )
+        create_mock = mocker.Mock(side_effect=OpenAIError("The server had an error while processing your request."))
         openai_completion_mock.create = create_mock
 
         with pytest.raises(OpenAIClientException) as error:

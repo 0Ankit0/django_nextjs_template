@@ -1,4 +1,5 @@
 import openai
+from openai import OpenAIError
 
 from config import settings
 
@@ -19,5 +20,5 @@ class OpenAIClient:
         try:
             result = openai.Completion.create(model="text-davinci-003", prompt=prompt, max_tokens=200, temperature=0.5)
             return OpenAICompletionResponse(**result)
-        except openai.error.APIError as error:
+        except OpenAIError as error:
             raise OpenAIClientException(OPEN_AI_API_ERROR_MSG) from error

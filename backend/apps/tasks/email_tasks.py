@@ -36,7 +36,7 @@ def send_email_task(to_email: str, subject: str, template_name: str, context: di
 @shared_task
 def send_welcome_email(user_id: int):
     """Send welcome email to new user."""
-    from apps.users.models import User
+    from users.models import User
 
     try:
         user = User.objects.get(id=user_id)
@@ -55,7 +55,7 @@ def send_welcome_email(user_id: int):
 @shared_task
 def send_password_reset_email(user_id: int, reset_token: str):
     """Send password reset email."""
-    from apps.users.models import User
+    from users.models import User
 
     try:
         user = User.objects.get(id=user_id)
@@ -76,7 +76,7 @@ def send_password_reset_email(user_id: int, reset_token: str):
 @shared_task
 def send_tenant_invitation_email(invitation_id: int):
     """Send tenant invitation email."""
-    from apps.multitenancy.models import TenantInvitation
+    from multitenancy.models import TenantInvitation
 
     try:
         invitation = TenantInvitation.objects.select_related("tenant", "invited_by").get(id=invitation_id)

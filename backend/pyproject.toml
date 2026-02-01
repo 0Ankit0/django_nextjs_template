@@ -39,7 +39,7 @@ ignore = [
 "**/factories.py" = ["ARG001", "ARG002"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["apps", "common", "config"]
+known-first-party = ["apps", "core", "config"]
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "config.settings"

@@ -1,4 +1,4 @@
-from common import emails
+from core import emails
 
 from . import constants, email_serializers
 

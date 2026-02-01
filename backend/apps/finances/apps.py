@@ -2,7 +2,8 @@ from django.apps import AppConfig
 
 
 class FinancesConfig(AppConfig):
-    name = "apps.finances"
+    name = "finances"
+    label = "finances"
 
     def ready(self):
         from . import signals  # noqa

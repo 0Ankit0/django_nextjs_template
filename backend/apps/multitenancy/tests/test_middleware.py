@@ -1,88 +1,102 @@
 from unittest.mock import Mock
 
 import pytest
-from graphql_relay import to_global_id
+from django.contrib.auth.models import AnonymousUser
+from django.test import RequestFactory
 
-from ..middleware import TenantUserRoleMiddleware, get_current_tenant, get_current_user_role
+from ..middleware import TenantMiddleware, get_current_tenant, get_current_user_role
 
 pytestmark = pytest.mark.django_db
 
 
-class TestGetTenantIdFromArguments:
-    def test_get_tenant_id_from_arguments_with_input(self, tenant):
-        args = {"input": {"tenant_id": to_global_id("TenantType", tenant.id)}}
-        result = TenantUserRoleMiddleware._get_tenant_id_from_arguments(args)
-        assert result == tenant.id
-
-    def test_get_tenant_id_from_arguments_without_input(self, tenant):
-        args = {"id": to_global_id("TenantType", tenant.id)}
-        result = TenantUserRoleMiddleware._get_tenant_id_from_arguments(args)
-        assert result == tenant.id
-
-    def test_get_tenant_id_from_arguments_invalid_id_type(self):
-        args = {"input": {"tenant_id": "InvalidType:123"}}
-        result = TenantUserRoleMiddleware._get_tenant_id_from_arguments(args)
-        assert result is None
-
-    def test_get_tenant_id_from_arguments_no_tenant_id(self):
-        args = {"input": {"other_field": "value"}}
-        result = TenantUserRoleMiddleware._get_tenant_id_from_arguments(args)
-        assert result is None
-
-    def test_get_tenant_id_from_arguments_no_args(self):
-        args = {}
-        result = TenantUserRoleMiddleware._get_tenant_id_from_arguments(args)
-        assert result is None
-
-
-class TestTenantUserRoleMiddlewareGetCurrentTenant:
-    def test_get_current_tenant_with_tenant_id(self, tenant_factory):
-        tenant_factory.create_batch(10)
-        tenant = tenant_factory(name="Test Tenant")
+class TestGetCurrentTenant:
+    def test_get_current_tenant_with_valid_id(self, tenant):
         result = get_current_tenant(tenant.id)
         assert result == tenant
+        assert result.id == tenant.id
 
-    def test_get_current_tenant_nonexistent_tenant(self, tenant_factory):
-        tenant_factory.create_batch(10)
-        tenant_factory(name="Test Tenant")
-        result = get_current_tenant("9999")
+    def test_get_current_tenant_with_invalid_id(self):
+        result = get_current_tenant("invalid-id")
         assert result is None
 
-    def test_get_current_tenant_missing_tenant_id(self, tenant_factory):
-        tenant_factory.create_batch(10)
-        tenant_factory(name="Test Tenant")
+    def test_get_current_tenant_with_none(self):
         result = get_current_tenant(None)
         assert result is None
 
 
-class TestTenantUserRoleMiddlewareGetCurrentUserRole:
-    def test_get_current_user_role_authenticated_user(self, graphene_client, tenant, user, tenant_membership_factory):
-        tenant_membership = tenant_membership_factory(user=user, tenant=tenant, role="admin")
-        info = Mock()
-        info.context.user = user
-        info.context.tenant = tenant
-        info.context.tenant_id = tenant.id
-        graphene_client.force_authenticate(user)
-        result = get_current_user_role(info.context.tenant, info.context.user)
+class TestGetCurrentUserRole:
+    def test_get_current_user_role_with_valid_membership(self, user, tenant, tenant_membership):
+        result = get_current_user_role(tenant, user)
         assert result == tenant_membership.role
 
-    def test_get_current_user_role_unauthenticated_user(self, tenant, user, tenant_membership_factory):
-        tenant_membership_factory(user=user, tenant=tenant, role="admin")
-        info = Mock()
-        info.context.user = None
-        info.context.tenant = tenant
-        info.context.tenant_id = tenant.id
-        result = get_current_user_role(info.context.tenant, info.context.user)
+    def test_get_current_user_role_without_membership(self, user, tenant):
+        result = get_current_user_role(tenant, user)
         assert result is None
 
-    def test_get_current_user_role_membership_does_not_exist(
-        self, graphene_client, tenant, user, tenant_membership_factory
-    ):
-        tenant_membership_factory(user=user, tenant=tenant, role="admin")
-        info = Mock()
-        info.context.user = user
-        info.context.tenant = None
-        info.context.tenant_id = None
-        graphene_client.force_authenticate(user)
-        result = get_current_user_role(info.context.tenant, info.context.user)
+    def test_get_current_user_role_with_anonymous_user(self, tenant):
+        anonymous_user = AnonymousUser()
+        result = get_current_user_role(tenant, anonymous_user)
         assert result is None
+
+    def test_get_current_user_role_with_none_tenant(self, user):
+        result = get_current_user_role(None, user)
+        assert result is None
+
+
+class TestTenantMiddleware:
+    def test_middleware_with_header(self, tenant, user):
+        factory = RequestFactory()
+        request = factory.get("/api/test/", HTTP_X_TENANT_ID=str(tenant.id))
+        request.user = user
+
+        middleware = TenantMiddleware(lambda r: Mock())
+        middleware(request)
+
+        assert request.tenant == tenant
+        assert hasattr(request, "user_role")
+
+    def test_middleware_with_query_param(self, tenant, user):
+        factory = RequestFactory()
+        request = factory.get(f"/api/test/?tenant_id={tenant.id}")
+        request.user = user
+
+        middleware = TenantMiddleware(lambda r: Mock())
+        middleware(request)
+
+        assert request.tenant == tenant
+        assert hasattr(request, "user_role")
+
+    def test_middleware_without_tenant_id(self, user):
+        factory = RequestFactory()
+        request = factory.get("/api/test/")
+        request.user = user
+
+        middleware = TenantMiddleware(lambda r: Mock())
+        middleware(request)
+
+        assert request.tenant is None
+        assert request.user_role is None
+
+    def test_middleware_with_invalid_tenant_id(self, user):
+        factory = RequestFactory()
+        request = factory.get("/api/test/", HTTP_X_TENANT_ID="invalid-id")
+        request.user = user
+
+        middleware = TenantMiddleware(lambda r: Mock())
+        middleware(request)
+
+        # SimpleLazyObject will return None when evaluated
+        assert request.tenant is None
+
+    def test_middleware_header_takes_precedence_over_query_param(self, tenant, user, tenant_factory):
+        other_tenant = tenant_factory()
+        factory = RequestFactory()
+        request = factory.get(f"/api/test/?tenant_id={other_tenant.id}", HTTP_X_TENANT_ID=str(tenant.id))
+        request.user = user
+
+        middleware = TenantMiddleware(lambda r: Mock())
+        middleware(request)
+
+        # Header should take precedence
+        assert request.tenant == tenant
+        assert request.tenant != other_tenant

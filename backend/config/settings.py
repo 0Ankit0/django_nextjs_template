@@ -11,7 +11,10 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 import datetime
+import importlib
+import json
 import os
+import sys
 from pathlib import Path
 
 import environ
@@ -25,6 +28,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env(
     DJANGO_DEBUG=(bool, False),
 )
+environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
 ASGI_APPLICATION = "config.asgi.application"
 
@@ -74,15 +78,21 @@ THIRD_PARTY_APPS = [
     "drf_standardized_errors",
 ]
 
+LOCAL_APPS = []
+APPS_DIR = os.path.join(BASE_DIR, "apps")
+sys.path.append(APPS_DIR)  # Ensure apps directory is in the path
+for app_name in os.listdir(APPS_DIR):
+    app_path = os.path.join(APPS_DIR, app_name)
+    if os.path.isdir(app_path) and os.path.isfile(os.path.join(app_path, "__init__.py")):
+        try:
+            importlib.import_module(app_name)
+            LOCAL_APPS.append(app_name)
+        except ImportError as e:
+            print(f"Could not import app {app_name}: {e}")
+
+
 INSTALLED_APPS = [
-    "apps.content",
-    "apps.finances",
-    "apps.integrations",
-    "apps.multitenancy",
-    "apps.notifications",
-    "apps.tasks",
-    "apps.users",
-    "apps.websockets",
+    *LOCAL_APPS,
     *DJANGO_CORE_APPS,
     *THIRD_PARTY_APPS,
 ]
@@ -101,12 +111,9 @@ MIDDLEWARE = [
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
-    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "corsheaders.middleware.CorsMiddleware",  # CORS Middleware
-    "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "multitenancy.middleware.TenantMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -117,6 +124,8 @@ MIDDLEWARE = [
 
 if DEBUG:
     MIDDLEWARE += ["debug_toolbar.middleware.DebugToolbarMiddleware"]
+
+SILENCED_SYSTEM_CHECKS = []
 
 ROOT_URLCONF = "config.urls_api"
 ROOT_HOSTCONF = "config.hosts"
@@ -144,7 +153,7 @@ PASSWORD_HASHERS = env.list(
         "django.contrib.auth.hashers.PBKDF2SHA1PasswordHasher",
         "django.contrib.auth.hashers.Argon2PasswordHasher",
         "django.contrib.auth.hashers.BCryptSHA256PasswordHasher",
-    ],
+    ],  # type: ignore
 )
 
 WSGI_APPLICATION = "config.wsgi.application"
@@ -201,7 +210,7 @@ if IS_LOCAL_DEBUG:
     REDIS_CONNECTION = None
 else:
     # Use PostgreSQL for production
-    DB_CONNECTION = json.loads(env("DB_CONNECTION"))
+    DB_CONNECTION = json.loads(env("DB_CONNECTION"))  # type: ignore
     DB_PROXY_ENDPOINT = env("DB_PROXY_ENDPOINT", default=None)
 
     DATABASES = {
@@ -218,7 +227,7 @@ else:
         "default": {
             "BACKEND": "channels_redis.core.RedisChannelLayer",
             "CONFIG": {
-                "hosts": [REDIS_CONNECTION],
+                "hosts": [REDIS_CONNECTION],  # type: ignore
             },
         },
     }
@@ -284,7 +293,7 @@ REST_FRAMEWORK = {
     "EXCEPTION_HANDLER": "drf_standardized_errors.handler.exception_handler",
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "apps.users.authentication.JSONWebTokenCookieAuthentication",
+        "users.authentication.JSONWebTokenCookieAuthentication",
         "rest_framework_simplejwt.authentication.JWTAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ),
@@ -431,7 +440,7 @@ if IS_LOCAL_DEBUG:
     # Print emails to console for local development
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 else:
-    CELERY_BROKER_URL = f'{env("REDIS_CONNECTION")}/0'
+    CELERY_BROKER_URL = f"{env('REDIS_CONNECTION')}/0"
     EMAIL_BACKEND = env("EMAIL_BACKEND", default="django_ses.SESBackend")
 
 CELERY_BROKER_TRANSPORT_OPTIONS = {

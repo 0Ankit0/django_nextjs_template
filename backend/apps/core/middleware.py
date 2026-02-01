@@ -4,8 +4,8 @@ from django.http import HttpResponse
 from django.utils.deprecation import MiddlewareMixin
 from rest_framework import status
 from sentry_sdk import capture_exception
+from users.utils import reset_auth_cookie, set_auth_cookie
 
-from apps.users.utils import reset_auth_cookie, set_auth_cookie
 from config import settings
 
 
@@ -54,7 +54,7 @@ class SentryMiddleware:
 
     @staticmethod
     def _get_validation_error_first_detail(detail):
-        if isinstance(detail, (list, dict)):
+        if isinstance(detail, list | dict):
             return next(iter(detail), detail)
         return detail
 

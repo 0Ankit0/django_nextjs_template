@@ -4,14 +4,12 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-django = "*"                                # Core web framework for building the application
 djangorestframework = "*"                   # REST API toolkit for Django, provides serializers, viewsets, etc.
 djangorestframework-simplejwt = "*"         # JWT authentication for DRF APIs
 django-filter = "*"                         # Advanced filtering for DRF API queries
 drf-spectacular = "*"                       # Automatic OpenAPI schema and documentation generation for DRF
 django-tailwind = "*"                       # Integration of Tailwind CSS with Django
 django-hashid-field = "*"                   # Hashids for Django models
-django-environ = "*"                        # Environment variables management for Django
 pillow = "*"                                # Image processing library for handling image uploads
 boto3 = "*"                                 # AWS SDK for Python, used with django-storages for S3
 channels = "*"                              # Django Channels for handling WebSockets and asynchronous tasks
@@ -49,6 +47,9 @@ django-cors-headers = "*"                   # CORS headers for Django that allow
 drf-nested-routers = "*"                    # Nested routers for DRF that allows nested routes
 djangorestframework-camel-case = "*"        # Camel case for DRF that converts snake_case to camelCase
 drf-standardized-errors = "*"               # Standardized errors for DRF that allows standardized errors
+django = "*"                                # Core web framework for building the application
+calleee = "*"                               # Django multi-tenancy support
+django-environ = "*"                        # Environment variable management for Django
 
 [dev-packages]
 ruff = "*"                                  # Fast Python linter and formatter
@@ -56,6 +57,7 @@ mypy = "*"                                  # Static type checker for Python
 django-stubs = "*"                          # Type hints for Django
 pre-commit = "*"                            # Framework for managing pre-commit hooks
 django-debug-toolbar = "*"                  # Debug toolbar for Django
+pytest-mock = "*"                           # Pytest plugin for easily mocking objects
 
 [requires]
 python_version = "3.14"

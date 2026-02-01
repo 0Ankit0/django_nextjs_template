@@ -11,22 +11,22 @@ app.config_from_object("django.conf:settings", namespace="CELERY")
 
 app.autodiscover_tasks(
     [
-        "apps.tasks",
+        "tasks",
     ]
 )
 
 # Celery Beat schedule for periodic tasks
 app.conf.beat_schedule = {
     "sync-content-every-hour": {
-        "task": "apps.tasks.content_tasks.sync_content",
+        "task": "tasks.content_tasks.sync_content",
         "schedule": crontab(minute=0),
     },
     "send-scheduled-notifications": {
-        "task": "apps.tasks.notification_tasks.send_scheduled_notifications",
+        "task": "tasks.notification_tasks.send_scheduled_notifications",
         "schedule": crontab(minute="*/5"),
     },
     "cleanup-expired-tokens": {
-        "task": "apps.tasks.scheduler.cleanup_expired_tokens",
+        "task": "tasks.scheduler.cleanup_expired_tokens",
         "schedule": crontab(hour=0, minute=0),
     },
 }

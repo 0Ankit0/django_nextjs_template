@@ -5,8 +5,7 @@ import factory
 from django.utils import timezone
 from djstripe import enums
 from djstripe import models as djstripe_models
-
-from apps.multitenancy.tests import factories as multitenancy_factories
+from multitenancy.tests import factories as multitenancy_factories
 
 from .. import constants, models
 

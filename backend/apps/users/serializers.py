@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model, password_validation
 from django.contrib.auth.models import update_last_login
 from django.utils.translation import gettext as _
 from hashid_field import rest
+from multitenancy.models import Tenant
 from rest_framework import exceptions, serializers, validators
 from rest_framework_simplejwt import exceptions as jwt_exceptions
 from rest_framework_simplejwt import serializers as jwt_serializers
@@ -12,8 +13,7 @@ from rest_framework_simplejwt.serializers import PasswordField
 from rest_framework_simplejwt.settings import api_settings as jwt_api_settings
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from apps.multitenancy.models import Tenant
-from common.decorators import context_user_required
+from core.decorators import context_user_required
 
 from . import jwt, models, notifications, tokens
 from .services import otp as otp_services

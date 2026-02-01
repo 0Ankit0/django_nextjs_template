@@ -56,10 +56,10 @@ check: ## Run Django system checks
 
 # Celery
 celery: ## Start Celery worker
-	pipenv run celery -A apps.tasks worker -l info
+	pipenv run celery -A tasks worker -l info
 
 celery-beat: ## Start Celery beat scheduler
-	pipenv run celery -A apps.tasks beat -l info
+	pipenv run celery -A tasks beat -l info
 
 # Clean
 clean: ## Clean build artifacts

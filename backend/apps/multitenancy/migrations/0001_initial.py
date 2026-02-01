@@ -5,38 +5,62 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='Tenant',
+            name="Tenant",
             fields=[
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('id', hashid_field.field.HashidAutoField(alphabet='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890', min_length=7, prefix='', primary_key=True, serialize=False)),
-                ('name', models.CharField(max_length=100)),
-                ('slug', models.SlugField(max_length=100, unique=True)),
-                ('type', models.CharField(choices=[('default', 'Default'), ('organization', 'Organization')])),
-                ('billing_email', models.EmailField(blank=True, max_length=255, verbose_name='billing email address')),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    hashid_field.field.HashidAutoField(
+                        alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
+                        min_length=7,
+                        prefix="",
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("name", models.CharField(max_length=100)),
+                ("slug", models.SlugField(max_length=100, unique=True)),
+                ("type", models.CharField(choices=[("default", "Default"), ("organization", "Organization")])),
+                ("billing_email", models.EmailField(blank=True, max_length=255, verbose_name="billing email address")),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.CreateModel(
-            name='TenantMembership',
+            name="TenantMembership",
             fields=[
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('id', hashid_field.field.HashidAutoField(alphabet='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890', min_length=7, prefix='', primary_key=True, serialize=False)),
-                ('role', models.CharField(choices=[('OWNER', 'Owner'), ('ADMIN', 'Administrator'), ('MEMBER', 'Member')], default='OWNER')),
-                ('is_accepted', models.BooleanField(default=False)),
-                ('invitation_accepted_at', models.DateTimeField(null=True)),
-                ('invitee_email_address', models.EmailField( default='', max_length=255, verbose_name='invitee email address')),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    hashid_field.field.HashidAutoField(
+                        alphabet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890",
+                        min_length=7,
+                        prefix="",
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                (
+                    "role",
+                    models.CharField(
+                        choices=[("OWNER", "Owner"), ("ADMIN", "Administrator"), ("MEMBER", "Member")], default="OWNER"
+                    ),
+                ),
+                ("is_accepted", models.BooleanField(default=False)),
+                ("invitation_accepted_at", models.DateTimeField(null=True)),
+                (
+                    "invitee_email_address",
+                    models.EmailField(default="", max_length=255, verbose_name="invitee email address"),
+                ),
             ],
         ),
     ]

@@ -2,4 +2,5 @@ from django.apps import AppConfig
 
 
 class WebsocketsConfig(AppConfig):
-    name = "apps.websockets"
+    name = "websockets"
+    label = "websockets"

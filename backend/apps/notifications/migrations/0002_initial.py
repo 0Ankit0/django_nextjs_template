@@ -6,41 +6,54 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
-        ('notifications', '0001_initial'),
+        ("notifications", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='notification',
-            name='issuer',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='notifications_issued', to=settings.AUTH_USER_MODEL),
+            model_name="notification",
+            name="issuer",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="notifications_issued",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='notification',
-            name='user',
+            model_name="notification",
+            name="user",
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
-            model_name='notificationpreference',
-            name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='notification_preferences', to=settings.AUTH_USER_MODEL),
+            model_name="notificationpreference",
+            name="user",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="notification_preferences",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='schedulednotification',
-            name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='scheduled_notifications', to=settings.AUTH_USER_MODEL),
+            model_name="schedulednotification",
+            name="user",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="scheduled_notifications",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='notificationpreference',
-            unique_together={('user', 'notification_type', 'channel')},
+            name="notificationpreference",
+            unique_together={("user", "notification_type", "channel")},
         ),
         migrations.AddIndex(
-            model_name='schedulednotification',
-            index=models.Index(fields=['scheduled_for', 'sent'], name='notificatio_schedul_1f6919_idx'),
+            model_name="schedulednotification",
+            index=models.Index(fields=["scheduled_for", "sent"], name="notificatio_schedul_1f6919_idx"),
         ),
     ]

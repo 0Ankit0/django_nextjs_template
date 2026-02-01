@@ -4,7 +4,7 @@ from django.db import IntegrityError, models, transaction
 from django.db.models import Q, UniqueConstraint
 from django.utils.text import slugify
 
-from common.models import TimestampedMixin
+from core.models import TimestampedMixin
 
 from . import constants
 from .managers import TenantManager, TenantMembershipManager
@@ -56,6 +56,9 @@ class Tenant(TimestampedMixin, models.Model):
     )
 
     objects = TenantManager()
+
+    class Meta:
+        app_label = "multitenancy"
 
     MAX_SAVE_ATTEMPTS = 10
 
@@ -131,7 +134,7 @@ class TenantMembership(TimestampedMixin, models.Model):
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="created_tenant_memberships"
     )
     role = models.CharField(choices=constants.TenantUserRole.choices, default=constants.TenantUserRole.OWNER)
-    tenant = models.ForeignKey(Tenant, on_delete=models.CASCADE, related_name="user_memberships")
+    tenant = models.ForeignKey("Tenant", on_delete=models.CASCADE, related_name="user_memberships")
 
     # Invitation connected fields
     is_accepted = models.BooleanField(default=False)
@@ -146,6 +149,7 @@ class TenantMembership(TimestampedMixin, models.Model):
     objects = TenantMembershipManager()
 
     class Meta:
+        app_label = "multitenancy"
         constraints = [
             UniqueConstraint(
                 name="unique_non_null_user_and_tenant", fields=["user", "tenant"], condition=Q(user__isnull=False)
@@ -158,4 +162,4 @@ class TenantMembership(TimestampedMixin, models.Model):
         ]
 
     def __str__(self):
-        return f"{self.user.email} {self.tenant.name} {self.role}"
+        return f"{self.user.email if self.user else self.invitee_email_address} {self.tenant.name} {self.role}"
