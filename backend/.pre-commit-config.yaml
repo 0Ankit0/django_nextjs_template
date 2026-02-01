@@ -29,7 +29,7 @@ repos:
     hooks:
       - id: django-check
         name: Django Check
-        entry: pipenv run python manage.py check
+        entry: bash -c "cd backend && pipenv run python manage.py check"
         language: system
         pass_filenames: false
         always_run: true
