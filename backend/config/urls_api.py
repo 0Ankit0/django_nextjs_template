@@ -40,17 +40,17 @@ urlpatterns = [
         include(
             [
                 # Authentication & User Management (single include to avoid namespace conflicts)
-                path("", include("users.urls")),
+                path("", include("users.urls", namespace="users")),
                 # Multi-tenancy
-                path("tenants/", include("multitenancy.urls")),
+                path("tenants/", include("multitenancy.urls", namespace="multitenancy")),
                 # Notifications
-                path("", include("notifications.urls")),
+                path("", include("notifications.urls", namespace="notifications")),
                 # Finances & Subscriptions
-                path("finances/", include("finances.urls")),
+                path("finances/", include("finances.urls", namespace="finances")),
                 # Content Management (Contentful CMS)
-                path("content/", include("content.urls")),
+                path("content/", include("content.urls", namespace="content")),
                 # Integrations (OpenAI)
-                path("integrations/", include("integrations.urls")),
+                path("integrations/", include("integrations.urls", namespace="integrations")),
             ]
         ),
     ),

@@ -35,19 +35,19 @@ class Tenant(TimestampedMixin, models.Model):
       base slug to ensure uniqueness.
     """
 
-    id: str = hashid_field.HashidAutoField(primary_key=True)
-    creator: settings.AUTH_USER_MODEL = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    name: str = models.CharField(max_length=100, unique=False)
-    slug: str = models.SlugField(max_length=100, unique=True)
-    type: str = models.CharField(choices=constants.TenantType.choices)
-    members = models.ManyToManyField(
+    id: hashid_field.HashidAutoField = hashid_field.HashidAutoField(primary_key=True)
+    creator: models.ForeignKey = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    name: models.CharField = models.CharField(max_length=100, unique=False)
+    slug: models.SlugField = models.SlugField(max_length=100, unique=True)
+    type: models.CharField = models.CharField(choices=constants.TenantType.choices)
+    members: models.ManyToManyField = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         through="TenantMembership",
         related_name="tenants",
         blank=True,
         through_fields=("tenant", "user"),
     )
-    billing_email = models.EmailField(
+    billing_email: models.EmailField = models.EmailField(
         # db_collation="case_insensitive",
         verbose_name="billing email address",
         max_length=255,
@@ -125,21 +125,23 @@ class TenantMembership(TimestampedMixin, models.Model):
       combinations.
     """
 
-    id: str = hashid_field.HashidAutoField(primary_key=True)
+    id: hashid_field.HashidAutoField = hashid_field.HashidAutoField(primary_key=True)
     # User - Tenant connection fields
-    user = models.ForeignKey(
+    user: models.ForeignKey = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="tenant_memberships", null=True
     )
-    creator: settings.AUTH_USER_MODEL = models.ForeignKey(
+    creator: models.ForeignKey = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name="created_tenant_memberships"
     )
-    role = models.CharField(choices=constants.TenantUserRole.choices, default=constants.TenantUserRole.OWNER)
-    tenant = models.ForeignKey("Tenant", on_delete=models.CASCADE, related_name="user_memberships")
+    role: models.CharField = models.CharField(
+        choices=constants.TenantUserRole.choices, default=constants.TenantUserRole.OWNER
+    )
+    tenant: models.ForeignKey = models.ForeignKey("Tenant", on_delete=models.CASCADE, related_name="user_memberships")
 
     # Invitation connected fields
-    is_accepted = models.BooleanField(default=False)
-    invitation_accepted_at = models.DateTimeField(null=True)
-    invitee_email_address = models.EmailField(
+    is_accepted: models.BooleanField = models.BooleanField(default=False)
+    invitation_accepted_at: models.DateTimeField = models.DateTimeField(null=True)
+    invitee_email_address: models.EmailField = models.EmailField(
         # db_collation="case_insensitive",
         verbose_name="invitee email address",
         max_length=255,

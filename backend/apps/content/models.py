@@ -5,12 +5,12 @@ from django.utils.text import slugify
 
 
 class ContentfulAbstractModel(models.Model):
-    id = models.CharField(max_length=64, primary_key=True)
-    fields = models.JSONField(default=dict)
+    id: models.CharField = models.CharField(max_length=64, primary_key=True)
+    fields: models.JSONField = models.JSONField(default=dict)
 
     # is_published is set to False both for unpublished and deleted items
     # to avoid unwanted cascade deletion
-    is_published = models.BooleanField(default=False)
+    is_published: models.BooleanField = models.BooleanField(default=False)
 
     class Meta:
         abstract = True
@@ -24,16 +24,16 @@ class DemoItem(ContentfulAbstractModel):
 class ContentItem(models.Model):
     """Generic content item synced from external CMS."""
 
-    id = hashid_field.HashidAutoField(primary_key=True)
-    external_id = models.CharField(max_length=64, unique=True)
-    content_type = models.CharField(max_length=64, db_index=True)
-    slug = models.SlugField(max_length=255, blank=True)
+    id: hashid_field.HashidAutoField = hashid_field.HashidAutoField(primary_key=True)
+    external_id: models.CharField = models.CharField(max_length=64, unique=True)
+    content_type: models.CharField = models.CharField(max_length=64, db_index=True)
+    slug: models.SlugField = models.SlugField(max_length=255, blank=True)
 
-    fields = models.JSONField(default=dict)
-    is_published = models.BooleanField(default=True, db_index=True)
+    fields: models.JSONField = models.JSONField(default=dict)
+    is_published: models.BooleanField = models.BooleanField(default=True, db_index=True)
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at: models.DateTimeField = models.DateTimeField(auto_now_add=True)
+    updated_at: models.DateTimeField = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ["-created_at"]
@@ -53,20 +53,22 @@ class ContentItem(models.Model):
 class Document(models.Model):
     """User-uploaded document."""
 
-    id = hashid_field.HashidAutoField(primary_key=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="documents")
+    id: hashid_field.HashidAutoField = hashid_field.HashidAutoField(primary_key=True)
+    user: models.ForeignKey = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="documents"
+    )
 
-    title = models.CharField(max_length=255)
-    file = models.FileField(upload_to="documents/%Y/%m/")
-    file_type = models.CharField(max_length=50, blank=True)
-    file_size = models.PositiveIntegerField(default=0)
+    title: models.CharField = models.CharField(max_length=255)
+    file: models.FileField = models.FileField(upload_to="documents/%Y/%m/")
+    file_type: models.CharField = models.CharField(max_length=50, blank=True)
+    file_size: models.PositiveIntegerField = models.PositiveIntegerField(default=0)
 
-    is_processed = models.BooleanField(default=False)
-    extracted_text = models.TextField(blank=True)
-    thumbnail = models.ImageField(upload_to="documents/thumbnails/", blank=True, null=True)
+    is_processed: models.BooleanField = models.BooleanField(default=False)
+    extracted_text: models.TextField = models.TextField(blank=True)
+    thumbnail: models.ImageField = models.ImageField(upload_to="documents/thumbnails/", blank=True, null=True)
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at: models.DateTimeField = models.DateTimeField(auto_now_add=True)
+    updated_at: models.DateTimeField = models.DateTimeField(auto_now=True)
 
     class Meta:
         ordering = ["-created_at"]
@@ -85,17 +87,17 @@ class Document(models.Model):
 class Page(models.Model):
     """Static page content."""
 
-    id = hashid_field.HashidAutoField(primary_key=True)
-    slug = models.SlugField(max_length=255, unique=True)
-    title = models.CharField(max_length=255)
-    content = models.TextField()
-    meta_description = models.CharField(max_length=255, blank=True)
+    id: hashid_field.HashidAutoField = hashid_field.HashidAutoField(primary_key=True)
+    slug: models.SlugField = models.SlugField(max_length=255, unique=True)
+    title: models.CharField = models.CharField(max_length=255)
+    content: models.TextField = models.TextField()
+    meta_description: models.CharField = models.CharField(max_length=255, blank=True)
 
-    is_published = models.BooleanField(default=True)
+    is_published: models.BooleanField = models.BooleanField(default=True)
 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    published_at = models.DateTimeField(null=True, blank=True)
+    created_at: models.DateTimeField = models.DateTimeField(auto_now_add=True)
+    updated_at: models.DateTimeField = models.DateTimeField(auto_now=True)
+    published_at: models.DateTimeField = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ["title"]

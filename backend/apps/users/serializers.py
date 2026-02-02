@@ -96,7 +96,7 @@ class UserSignupSerializer(serializers.ModelSerializer):
 
 
 class UserAccountConfirmationSerializer(serializers.Serializer):
-    user = serializers.PrimaryKeyRelatedField(
+    user: serializers.PrimaryKeyRelatedField = serializers.PrimaryKeyRelatedField(
         queryset=models.User.objects.all(),
         pk_field=rest.HashidSerializerCharField(),
         write_only=True,
@@ -216,7 +216,7 @@ class PasswordResetConfirmationSerializer(serializers.Serializer):
 
 
 class CookieTokenObtainPairSerializer(jwt_serializers.TokenObtainPairSerializer):
-    username_field = get_user_model().USERNAME_FIELD
+    username_field = get_user_model().USERNAME_FIELD  # type: ignore[attr-defined]
 
     default_error_messages = {"no_active_account": _("No active account found with the given credentials")}
 

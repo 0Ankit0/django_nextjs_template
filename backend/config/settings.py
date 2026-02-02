@@ -16,6 +16,7 @@ import json
 import os
 import sys
 from pathlib import Path
+from typing import Any
 
 import environ
 
@@ -210,6 +211,7 @@ if IS_LOCAL_DEBUG:
     REDIS_CONNECTION = None
 else:
     # Use PostgreSQL for production
+    REDIS_CONNECTION = env("REDIS_CONNECTION")
     DB_CONNECTION = json.loads(env("DB_CONNECTION"))  # type: ignore
     DB_PROXY_ENDPOINT = env("DB_PROXY_ENDPOINT", default=None)
 
@@ -232,13 +234,13 @@ else:
         },
     }
 
-    CACHES = {
+    CACHES: dict[str, Any] = {  # type: ignore[no-redef]
         "default": {
             "BACKEND": "django_redis.cache.RedisCache",
             "LOCATION": REDIS_CONNECTION,
             "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
         }
-    }
+    }  # type: ignore
 
 
 # Password validation
@@ -312,7 +314,7 @@ REST_FRAMEWORK = {
 }
 
 # CORS Settings
-CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=["http://localhost:3000"])
+CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=["http://localhost:3000", "http://127.0.0.1:3000"])
 CORS_ALLOW_CREDENTIALS = True
 
 # Standardized Errors Settings
@@ -359,7 +361,7 @@ SOCIAL_AUTH_FACEBOOK_PROFILE_EXTRA_PARAMS = {
 }
 SOCIAL_AUTH_LOGIN_ERROR_URL = "/"
 SOCIAL_AUTH_FIELDS_STORED_IN_SESSION = ["locale"]
-SOCIAL_AUTH_URL_NAMESPACE = "users_api:social"
+SOCIAL_AUTH_URL_NAMESPACE = "users:social"
 
 SWAGGER_SETTINGS = {
     "DEFAULT_INFO": "config.urls_api.api_info",
@@ -402,7 +404,7 @@ SUBSCRIPTION_TRIAL_PERIOD_DAYS = env("SUBSCRIPTION_TRIAL_PERIOD_DAYS", default=7
 
 NOTIFICATIONS_STRATEGIES = ["InAppNotificationStrategy"]
 
-SHELL_PLUS_IMPORTS = []
+SHELL_PLUS_IMPORTS: list[str] = []
 
 AWS_STORAGE_BUCKET_NAME = env("AWS_STORAGE_BUCKET_NAME", default=None)
 AWS_EXPORTS_STORAGE_BUCKET_NAME = env("AWS_EXPORTS_STORAGE_BUCKET_NAME", default=None)

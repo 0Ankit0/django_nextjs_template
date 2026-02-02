@@ -1,5 +1,3 @@
-import datetime
-
 import hashid_field
 from django.conf import settings
 from django.db import models
@@ -9,16 +7,16 @@ from . import managers
 
 
 class Notification(models.Model):
-    id: str = hashid_field.HashidAutoField(primary_key=True)
-    user: settings.AUTH_USER_MODEL = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    type: str = models.CharField(max_length=64)
+    id: hashid_field.HashidAutoField = hashid_field.HashidAutoField(primary_key=True)
+    user: models.ForeignKey = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    type: models.CharField = models.CharField(max_length=64)
 
-    created_at: datetime.datetime = models.DateTimeField(auto_now_add=True)
-    read_at: datetime.datetime | None = models.DateTimeField(null=True, blank=True)
+    created_at: models.DateTimeField = models.DateTimeField(auto_now_add=True)
+    read_at: models.DateTimeField = models.DateTimeField(null=True, blank=True)
 
-    data: dict = models.JSONField(default=dict)
+    data: models.JSONField = models.JSONField(default=dict)
 
-    issuer: settings.AUTH_USER_MODEL = models.ForeignKey(
+    issuer: models.ForeignKey = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True, related_name="notifications_issued"
     )
 
@@ -39,18 +37,18 @@ class Notification(models.Model):
 class ScheduledNotification(models.Model):
     """Model for scheduled notifications to be sent at a future time."""
 
-    id: str = hashid_field.HashidAutoField(primary_key=True)
-    user: settings.AUTH_USER_MODEL = models.ForeignKey(
+    id: hashid_field.HashidAutoField = hashid_field.HashidAutoField(primary_key=True)
+    user: models.ForeignKey = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="scheduled_notifications"
     )
-    type: str = models.CharField(max_length=64)
-    data: dict = models.JSONField(default=dict)
+    type: models.CharField = models.CharField(max_length=64)
+    data: models.JSONField = models.JSONField(default=dict)
 
-    scheduled_for: datetime.datetime = models.DateTimeField()
-    sent: bool = models.BooleanField(default=False)
-    sent_at: datetime.datetime | None = models.DateTimeField(null=True, blank=True)
+    scheduled_for: models.DateTimeField = models.DateTimeField()
+    sent: models.BooleanField = models.BooleanField(default=False)
+    sent_at: models.DateTimeField = models.DateTimeField(null=True, blank=True)
 
-    created_at: datetime.datetime = models.DateTimeField(auto_now_add=True)
+    created_at: models.DateTimeField = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ["scheduled_for"]
@@ -71,12 +69,12 @@ class NotificationPreference(models.Model):
         ("in_app", "In-App"),
     ]
 
-    user: settings.AUTH_USER_MODEL = models.ForeignKey(
+    user: models.ForeignKey = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notification_preferences"
     )
-    notification_type: str = models.CharField(max_length=64)
-    channel: str = models.CharField(max_length=20, choices=CHANNEL_CHOICES)
-    enabled: bool = models.BooleanField(default=True)
+    notification_type: models.CharField = models.CharField(max_length=64)
+    channel: models.CharField = models.CharField(max_length=20, choices=CHANNEL_CHOICES)
+    enabled: models.BooleanField = models.BooleanField(default=True)
 
     class Meta:
         unique_together = ["user", "notification_type", "channel"]

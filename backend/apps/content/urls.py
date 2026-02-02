@@ -3,6 +3,8 @@ from rest_framework.routers import DefaultRouter
 
 from . import views
 
+app_name = "content"
+
 router = DefaultRouter()
 router.register(r"items", views.ContentItemViewSet, basename="content-items")
 router.register(r"documents", views.DocumentViewSet, basename="documents")

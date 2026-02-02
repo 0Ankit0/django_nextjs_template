@@ -136,6 +136,7 @@ class CreateTenantInvitationSerializer(serializers.Serializer):
 class TenantMembershipSerializer(serializers.ModelSerializer):
     """Serializer for tenant membership"""
 
+    id = hidrest.HashidSerializerCharField(source_field="multitenancy.TenantMembership.id", read_only=True)
     user_email = serializers.SerializerMethodField()
     user_name = serializers.SerializerMethodField()
 
@@ -169,6 +170,7 @@ class TenantMembershipSerializer(serializers.ModelSerializer):
 class TenantInvitationSerializer(serializers.ModelSerializer):
     """Serializer for pending tenant invitations (memberships not yet accepted)"""
 
+    id = hidrest.HashidSerializerCharField(source_field="multitenancy.TenantMembership.id", read_only=True)
     creator_email = serializers.SerializerMethodField()
 
     class Meta:

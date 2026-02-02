@@ -3,12 +3,15 @@ from rest_framework.routers import DefaultRouter
 
 from . import views
 
+app_name = "finances"
+
 router = DefaultRouter()
 router.register(r"payment-intents", views.PaymentIntentViewSet, basename="payment-intent")
 router.register(r"setup-intents", views.SetupIntentViewSet, basename="setup-intent")
 router.register(r"payment-methods", views.PaymentMethodViewSet, basename="payment-method")
 router.register(r"subscriptions", views.SubscriptionViewSet, basename="subscription")
 router.register(r"subscription-schedules", views.SubscriptionScheduleViewSet, basename="subscription-schedule")
+router.register(r"transactions", views.TransactionViewSet, basename="transaction")
 
 stripe_urls = [
     path("", include("djstripe.urls", namespace="djstripe")),

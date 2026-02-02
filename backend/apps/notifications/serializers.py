@@ -11,8 +11,8 @@ class NotificationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Notification
-        fields = ("id", "type", "data", "is_read", "read_at", "created_at", "updated_at")
-        read_only_fields = ("id", "type", "data", "created_at", "updated_at")
+        fields = ("id", "type", "data", "is_read", "read_at", "created_at")
+        read_only_fields = ("id", "type", "data", "created_at")
 
 
 class UpdateNotificationSerializer(serializers.ModelSerializer):

@@ -14,6 +14,8 @@ class ContentfulWebhookSerializer(serializers.Serializer):
 class ContentItemSerializer(serializers.ModelSerializer):
     """Serializer for ContentItem model."""
 
+    id = serializers.CharField(read_only=True)
+
     class Meta:
         model = models.ContentItem
         fields = ["id", "external_id", "content_type", "slug", "fields", "is_published", "created_at", "updated_at"]
@@ -23,6 +25,7 @@ class ContentItemSerializer(serializers.ModelSerializer):
 class DocumentSerializer(serializers.ModelSerializer):
     """Serializer for Document model."""
 
+    id = serializers.CharField(read_only=True)
     file_url = serializers.SerializerMethodField()
     thumbnail_url = serializers.SerializerMethodField()
 
@@ -69,6 +72,8 @@ class DocumentSerializer(serializers.ModelSerializer):
 class DocumentUploadSerializer(serializers.ModelSerializer):
     """Serializer for uploading documents."""
 
+    # No id field needed, as DocumentUploadSerializer does not expose 'id'
+
     class Meta:
         model = models.Document
         fields = ["title", "file"]
@@ -93,6 +98,8 @@ class DocumentUploadSerializer(serializers.ModelSerializer):
 class PageSerializer(serializers.ModelSerializer):
     """Serializer for Page model."""
 
+    id = serializers.CharField(read_only=True)
+
     class Meta:
         model = models.Page
         fields = [
@@ -111,6 +118,8 @@ class PageSerializer(serializers.ModelSerializer):
 
 class PageListSerializer(serializers.ModelSerializer):
     """Lightweight serializer for page listings."""
+
+    id = serializers.CharField(read_only=True)
 
     class Meta:
         model = models.Page

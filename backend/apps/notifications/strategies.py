@@ -12,11 +12,11 @@ class BaseNotificationStrategy:
         return True
 
     @staticmethod
-    def send_notification(user: str, type: str, data: dict):
+    def send_notification(user: str, type: str, data: dict, issuer: str | None = None):
         raise NotImplementedError("Subclasses of BaseNotificationStrategy must provide a send_notification() function")
 
 
 class InAppNotificationStrategy(BaseNotificationStrategy):
     @staticmethod
-    def send_notification(user: str, type: str, data: dict, issuer: str):
+    def send_notification(user: str, type: str, data: dict, issuer: str | None = None):
         models.Notification.objects.create(user=user, type=type, data=data, issuer=issuer)

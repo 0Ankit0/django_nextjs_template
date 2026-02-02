@@ -20,7 +20,7 @@ def validate_jwt(response_data, user):
 
 class TestTokenRefresh:
     def test_return_error_if_no_cookie_or_payload_is_sent(self, api_client):
-        response = api_client.post(reverse("jwt_token_refresh"))
+        response = api_client.post(reverse("users:jwt_token_refresh"))
         assert response.json() == {
             "non_field_errors": ["No valid token found in cookie 'refresh_token' or field 'refresh'"]
         }
@@ -35,7 +35,7 @@ class TestTokenRefresh:
         )
 
         response = api_client.post(
-            reverse("jwt_token_refresh"),
+            reverse("users:jwt_token_refresh"),
         )
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
@@ -51,7 +51,7 @@ class TestTokenRefresh:
             }
         )
 
-        response = api_client.post(reverse("jwt_token_refresh"))
+        response = api_client.post(reverse("users:jwt_token_refresh"))
 
         assert response.status_code == status.HTTP_200_OK
         new_access_token_raw = response.cookies[settings.ACCESS_TOKEN_COOKIE].value
@@ -63,7 +63,7 @@ class TestTokenRefresh:
     def test_refresh_sent_in_payload(self, api_client, user: models.User):
         refresh = RefreshToken.for_user(user)
 
-        response = api_client.post(reverse("jwt_token_refresh"), data={"refresh": str(refresh)})
+        response = api_client.post(reverse("users:jwt_token_refresh"), data={"refresh": str(refresh)})
 
         assert response.status_code == status.HTTP_200_OK
         new_access_token_raw = response.json().get("access")
@@ -75,7 +75,7 @@ class TestTokenRefresh:
 
 class TestLogout:
     def test_raise_error_if_no_cookie_or_payload_is_sent(self, api_client):
-        response = api_client.post(reverse("logout"))
+        response = api_client.post(reverse("users:logout"))
         assert response.json() == {
             "non_field_errors": ["No valid token found in cookie 'refresh_token' or field 'refresh'"]
         }
@@ -88,7 +88,7 @@ class TestLogout:
             }
         )
 
-        response = api_client.post(reverse("logout"))
+        response = api_client.post(reverse("users:logout"))
 
         assert response.status_code == status.HTTP_200_OK
         assert not response.cookies[settings.ACCESS_TOKEN_COOKIE].value
@@ -103,11 +103,11 @@ class TestLogout:
             }
         )
 
-        api_client.post(reverse("logout"))
+        api_client.post(reverse("users:logout"))
 
         assert BlacklistedToken.objects.filter(token__jti=refresh["jti"]).exists()
 
     def test_blacklist_old_token_with_refresh_in_payload(self, api_client, user: models.User):
         refresh = RefreshToken.for_user(user)
-        api_client.post(reverse("logout"), data={"refresh": str(refresh)})
+        api_client.post(reverse("users:logout"), data={"refresh": str(refresh)})
         assert BlacklistedToken.objects.filter(token__jti=refresh["jti"]).exists()

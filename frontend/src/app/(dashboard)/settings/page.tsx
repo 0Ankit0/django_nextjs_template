@@ -29,6 +29,8 @@ const passwordSchema = z
 type ProfileFormData = z.infer<typeof profileSchema>;
 type PasswordFormData = z.infer<typeof passwordSchema>;
 
+import { Skeleton } from '@/components/ui';
+
 export default function SettingsPage() {
   const { data: profile, isLoading } = useUserProfile();
   const updateProfile = useUpdateProfile();
@@ -61,8 +63,42 @@ export default function SettingsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+      <div className="space-y-6">
+        <div>
+          <Skeleton className="h-8 w-48 mb-2" />
+          <Skeleton className="h-4 w-64" />
+        </div>
+
+        <div className="flex gap-6">
+          <div className="w-64 flex-shrink-0">
+            <div className="space-y-1">
+              {[1, 2, 3, 4].map((i) => (
+                <Skeleton key={i} className="h-10 w-full rounded-lg" />
+              ))}
+            </div>
+          </div>
+
+          <div className="flex-1">
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-6 w-48" />
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-10 w-full" />
+                  </div>
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-10 w-full" />
+                  </div>
+                </div>
+                <Skeleton className="h-10 w-32" />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     );
   }

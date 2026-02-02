@@ -13,6 +13,8 @@ class PaymentIntentViewSet(viewsets.ModelViewSet):
     http_method_names = ["get", "post", "patch"]
 
     def get_queryset(self):
+        if not getattr(self.request, "tenant", None):
+            return djstripe_models.PaymentIntent.objects.none()
         customer, _ = djstripe_models.Customer.get_or_create(self.request.tenant)
         return djstripe_models.PaymentIntent.objects.filter(customer=customer)
 
@@ -23,6 +25,8 @@ class SetupIntentViewSet(viewsets.ModelViewSet):
     http_method_names = ["get", "post"]
 
     def get_queryset(self):
+        if not getattr(self.request, "tenant", None):
+            return djstripe_models.SetupIntent.objects.none()
         customer, _ = djstripe_models.Customer.get_or_create(self.request.tenant)
         return djstripe_models.SetupIntent.objects.filter(customer=customer)
 
@@ -33,6 +37,8 @@ class PaymentMethodViewSet(viewsets.ModelViewSet):
     http_method_names = ["get", "delete"]
 
     def get_queryset(self):
+        if not getattr(self.request, "tenant", None):
+            return djstripe_models.PaymentMethod.objects.none()
         customer, _ = djstripe_models.Customer.get_or_create(self.request.tenant)
         return djstripe_models.PaymentMethod.objects.filter(customer=customer)
 
@@ -52,6 +58,8 @@ class SubscriptionViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        if not getattr(self.request, "tenant", None):
+            return djstripe_models.Subscription.objects.none()
         customer, _ = djstripe_models.Customer.get_or_create(self.request.tenant)
         return djstripe_models.Subscription.objects.filter(customer=customer)
 
@@ -62,6 +70,8 @@ class SubscriptionScheduleViewSet(viewsets.ModelViewSet):
     http_method_names = ["get", "patch"]
 
     def get_queryset(self):
+        if not getattr(self.request, "tenant", None):
+            return djstripe_models.SubscriptionSchedule.objects.none()
         customer, _ = djstripe_models.Customer.get_or_create(self.request.tenant)
         return djstripe_models.SubscriptionSchedule.objects.filter(customer=customer)
 
@@ -72,3 +82,14 @@ class SubscriptionScheduleViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({"message": "Subscription cancelled"}, status=status.HTTP_200_OK)
+
+
+class TransactionViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = serializers.TenantChargeSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        if not getattr(self.request, "tenant", None):
+            return djstripe_models.Charge.objects.none()
+        customer, _ = djstripe_models.Customer.get_or_create(self.request.tenant)
+        return djstripe_models.Charge.objects.filter(customer=customer)

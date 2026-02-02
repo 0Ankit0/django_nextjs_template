@@ -1,4 +1,5 @@
 from django.contrib.auth import REDIRECT_FIELD_NAME
+from django.contrib.auth import views as auth_views
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics, status, viewsets
@@ -14,6 +15,11 @@ from social_django.utils import psa
 from config import settings
 
 from . import models, serializers, utils
+
+
+# Standard Django login view for browsable API and schema UI
+class LoginView(auth_views.LoginView):
+    template_name = "admin/login.html"  # Use Django admin login template or customize as needed
 
 
 class CookieTokenRefreshView(jwt_views.TokenRefreshView):
@@ -43,6 +49,18 @@ class CookieTokenRefreshView(jwt_views.TokenRefreshView):
                 settings.REFRESH_TOKEN_COOKIE: serializer.data.get("refresh"),
             },
         )
+        return response
+
+
+class CookieTokenObtainPairView(jwt_views.TokenObtainPairView):
+    """Obtain access and refresh tokens and set them in HTTP-only cookies."""
+
+    serializer_class = serializers.CookieTokenObtainPairSerializer
+
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        if response.status_code == status.HTTP_200_OK:
+            utils.set_auth_cookie(response, response.data)
         return response
 
 
@@ -195,6 +213,21 @@ class OTPDisableView(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({"message": "OTP disabled successfully"}, status=status.HTTP_200_OK)
+
+
+class ValidateOTPView(generics.GenericAPIView):
+    """Validate OTP code and set auth cookies if successful."""
+
+    serializer_class = serializers.ValidateOTPSerializer
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        result = serializer.save()
+        response = Response(result, status=status.HTTP_200_OK)
+        utils.set_auth_cookie(response, result)
+        return response
 
 
 @never_cache

@@ -3,6 +3,8 @@ from rest_framework.routers import DefaultRouter
 
 from . import views
 
+app_name = "notifications"
+
 router = DefaultRouter()
 router.register(r"notifications", views.NotificationViewSet, basename="notification")
 

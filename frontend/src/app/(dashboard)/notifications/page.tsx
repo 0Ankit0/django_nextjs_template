@@ -9,6 +9,8 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Bell, Check, CheckCheck } from 'lucide-react';
 
+import { Skeleton } from '@/components/ui';
+
 export default function NotificationsPage() {
   const { data, isLoading } = useNotifications();
   const markRead = useMarkNotificationRead();
@@ -16,8 +18,30 @@ export default function NotificationsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <Skeleton className="h-8 w-48 mb-2" />
+            <Skeleton className="h-4 w-64" />
+          </div>
+          <Skeleton className="h-10 w-32" />
+        </div>
+
+        <Card>
+          <CardContent className="p-0">
+            <div className="divide-y divide-gray-200">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="p-4 flex items-start gap-4">
+                  <Skeleton className="h-10 w-10 rounded-full flex-shrink-0" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-1/3" />
+                    <Skeleton className="h-4 w-full" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }

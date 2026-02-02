@@ -13,4 +13,4 @@ class NotificationQuerySet(models.QuerySet):
         self.update(read_at=timezone.now())
 
 
-NotificationManager = models.Manager.from_queryset(NotificationQuerySet)
+NotificationManager = models.Manager.from_queryset(NotificationQuerySet)  # type: ignore

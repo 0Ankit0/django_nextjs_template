@@ -10,8 +10,8 @@ logger = logging.getLogger(__name__)
 
 
 class TenantInvitationEmail(emails.Email):
-    name = "TENANT_INVITATION"
-    serializer_class = email_serializers.TenantInvitationEmailSerializer
+    name = "TENANT_INVITATION"  # type: ignore[assignment]
+    serializer_class = email_serializers.TenantInvitationEmailSerializer  # type: ignore[assignment]
 
 
 def send_tenant_invitation_notification(tenant_membership: models.TenantMembership, membership_id: str, token: str):
@@ -30,12 +30,17 @@ def send_tenant_invitation_notification(tenant_membership: models.TenantMembersh
 
 def send_accepted_tenant_invitation_notification(tenant_membership: models.TenantMembership, membership_id: str):
     if tenant_membership.creator:
+        # Use explicit type check or safe access for profile
+        name = str(tenant_membership.user)
+        if hasattr(tenant_membership.user, "profile"):
+            name = str(tenant_membership.user.profile)  # type: ignore[attr-defined]
+
         sender.send_notification(
             user=tenant_membership.creator,
             type=constants.Notification.TENANT_INVITATION_ACCEPTED.value,
             data={
                 "id": membership_id,
-                "name": str(tenant_membership.user.profile) or str(tenant_membership.user),
+                "name": name,
                 "tenant_name": str(tenant_membership.tenant),
             },
             issuer=tenant_membership.user,
@@ -44,12 +49,16 @@ def send_accepted_tenant_invitation_notification(tenant_membership: models.Tenan
 
 def send_declined_tenant_invitation_notification(tenant_membership: models.TenantMembership, membership_id: str):
     if tenant_membership.creator:
+        name = str(tenant_membership.user)
+        if hasattr(tenant_membership.user, "profile"):
+            name = str(tenant_membership.user.profile)  # type: ignore[attr-defined]
+
         sender.send_notification(
             user=tenant_membership.creator,
             type=constants.Notification.TENANT_INVITATION_DECLINED.value,
             data={
                 "id": membership_id,
-                "name": str(tenant_membership.user.profile) or str(tenant_membership.user),
+                "name": name,
                 "tenant_name": str(tenant_membership.tenant),
             },
             issuer=tenant_membership.user,

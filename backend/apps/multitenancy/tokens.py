@@ -1,6 +1,6 @@
 from datetime import UTC, datetime
 
-import six
+import six  # type: ignore[import-untyped]
 from django.conf import settings
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.crypto import constant_time_compare, salted_hmac

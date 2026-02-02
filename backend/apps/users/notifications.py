@@ -13,10 +13,10 @@ class UserEmail(emails.Email):
 
 
 class AccountActivationEmail(UserEmail):
-    name = "ACCOUNT_ACTIVATION"
-    serializer_class = email_serializers.AccountActivationEmailSerializer
+    name = "ACCOUNT_ACTIVATION"  # type: ignore[assignment]
+    serializer_class = email_serializers.AccountActivationEmailSerializer  # type: ignore[assignment]
 
 
 class PasswordResetEmail(UserEmail):
-    name = "PASSWORD_RESET"
-    serializer_class = email_serializers.PasswordResetEmailSerializer
+    name = "PASSWORD_RESET"  # type: ignore[assignment]
+    serializer_class = email_serializers.PasswordResetEmailSerializer  # type: ignore[assignment]

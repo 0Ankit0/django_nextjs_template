@@ -50,7 +50,7 @@ class Email(BaseEmail):
 
 
 @shared_task(bind=True)
-def send_email(self, to: str | list[str], email_type: str, email_data: dict):
+def send_email(self, to: str | list[str] | tuple[str], email_type: str, email_data: dict):
     render_script = """
     const { renderEmail } = require('./email');
     console.log(JSON.stringify(renderEmail('%s', %s)));

@@ -34,8 +34,8 @@ class ImageWithThumbnailMixin:
 
 
 class TimestampedMixin(models.Model):
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at: models.DateTimeField = models.DateTimeField(auto_now_add=True)
+    updated_at: models.DateTimeField = models.DateTimeField(auto_now=True)
 
     class Meta:
         abstract = True
@@ -46,7 +46,7 @@ class TenantDependentModelMixin(models.Model):
     A mixin class for models that are dependent on a specific tenant.
     """
 
-    tenant = models.ForeignKey(
+    tenant: models.ForeignKey = models.ForeignKey(
         to="multitenancy.Tenant",
         on_delete=models.CASCADE,
         related_name="%(class)s_set",

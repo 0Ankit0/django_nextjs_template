@@ -4,6 +4,8 @@ from social_django import views as django_social_views
 
 from . import views
 
+app_name = "users"
+
 # Social auth patterns
 social_patterns = [
     # authentication / association
@@ -23,7 +25,10 @@ router = DefaultRouter()
 router.register(r"profile", views.UserProfileViewSet, basename="profile")
 
 user_patterns = [
+    # Standard Django login for browsable API and schema UI
+    path("login/", views.LoginView.as_view(), name="login"),
     # JWT Auth
+    path("token/", views.CookieTokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("token-refresh/", views.CookieTokenRefreshView.as_view(), name="jwt_token_refresh"),
     path("logout/", views.LogoutView.as_view(), name="logout"),
     # User Registration & Confirmation
@@ -36,6 +41,7 @@ user_patterns = [
     # OTP / 2FA
     path("otp/generate/", views.OTPGenerateView.as_view(), name="otp-generate"),
     path("otp/verify/", views.OTPVerifyView.as_view(), name="otp-verify"),
+    path("otp/validate/", views.ValidateOTPView.as_view(), name="otp-validate"),
     path("otp/disable/", views.OTPDisableView.as_view(), name="otp-disable"),
     # Social Auth
     path("social/", include((social_patterns, "social"), namespace="social")),

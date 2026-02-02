@@ -1,3 +1,5 @@
+from typing import TYPE_CHECKING, Optional
+
 from django.contrib.auth import get_user_model
 
 from ..constants import TenantUserRole
@@ -5,13 +7,16 @@ from ..models import Tenant, TenantMembership
 from ..notifications import TenantInvitationEmail, send_tenant_invitation_notification
 from ..tokens import tenant_invitation_token
 
-User = get_user_model()
+if TYPE_CHECKING:
+    from users.models import User
+
+UserModel = get_user_model()
 
 
 def create_tenant_membership(
     tenant: Tenant,
-    user: User = None,
-    creator: User = None,
+    user: Optional["User"] = None,
+    creator: Optional["User"] = None,
     invitee_email_address: str = "",
     role: TenantUserRole = TenantUserRole.MEMBER,
     is_accepted: bool = False,
@@ -25,13 +30,21 @@ def create_tenant_membership(
         creator=creator,
     )
     if not is_accepted:
-        token = tenant_invitation_token.make_token(
-            user_email=invitee_email_address if invitee_email_address else user.email, tenant_membership=membership
-        )
+        # Use simple conditional assignment for email to avoid type errors
+        email_to_use = invitee_email_address
+        if not email_to_use and user:
+            email_to_use = user.email
+
+        token = tenant_invitation_token.make_token(user_email=email_to_use, tenant_membership=membership)
         # Use the membership ID directly instead of GraphQL global ID
         tenant_membership_id = str(membership.id)
+
+        recipient_email = invitee_email_address
+        if user:
+            recipient_email = user.email
+
         TenantInvitationEmail(
-            to=user.email if user else invitee_email_address,
+            to=recipient_email,
             data={"tenant_membership_id": tenant_membership_id, "token": token},
         ).send()
 

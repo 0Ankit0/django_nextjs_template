@@ -18,7 +18,7 @@ class UserManager(BaseUserManager):
             email=normalized_email,
         )
         user.set_password(password)
-        user_group = Group.objects.get(name=commonGroups.User)
+        user_group, _ = Group.objects.get_or_create(name=commonGroups.User)
         user.save(using=self._db)
 
         user.groups.add(user_group)
@@ -44,22 +44,22 @@ class UserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    id = hashid_field.HashidAutoField(primary_key=True)
-    created = models.DateTimeField(editable=False, auto_now_add=True)
-    email = models.EmailField(
+    id: hashid_field.HashidAutoField = hashid_field.HashidAutoField(primary_key=True)
+    created: models.DateTimeField = models.DateTimeField(editable=False, auto_now_add=True)
+    email: models.EmailField = models.EmailField(
         # db_collation="case_insensitive",
         verbose_name="email address",
         max_length=255,
         unique=True,
     )
-    is_confirmed = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=True)
-    is_superuser = models.BooleanField(default=False)
+    is_confirmed: models.BooleanField = models.BooleanField(default=False)
+    is_active: models.BooleanField = models.BooleanField(default=True)
+    is_superuser: models.BooleanField = models.BooleanField(default=False)
 
-    otp_enabled = models.BooleanField(default=False)
-    otp_verified = models.BooleanField(default=False)
-    otp_base32 = models.CharField(max_length=255, blank=True, default="")
-    otp_auth_url = models.CharField(max_length=255, blank=True, default="")
+    otp_enabled: models.BooleanField = models.BooleanField(default=False)
+    otp_verified: models.BooleanField = models.BooleanField(default=False)
+    otp_base32: models.CharField = models.CharField(max_length=255, blank=True, default="")
+    otp_auth_url: models.CharField = models.CharField(max_length=255, blank=True, default="")
 
     objects = UserManager()
 
@@ -91,14 +91,14 @@ class UserAvatar(ImageWithThumbnailMixin, models.Model):
     ERROR_FIELD_NAME = "avatar"
 
     def __str__(self) -> str:
-        return str(self.id)
+        return str(self.pk)
 
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
-    first_name = models.CharField(max_length=40, blank=True, default="")
-    last_name = models.CharField(max_length=40, blank=True, default="")
-    avatar = models.OneToOneField(
+    user: models.OneToOneField = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
+    first_name: models.CharField = models.CharField(max_length=40, blank=True, default="")
+    last_name: models.CharField = models.CharField(max_length=40, blank=True, default="")
+    avatar: models.OneToOneField = models.OneToOneField(
         UserAvatar, on_delete=models.SET_NULL, null=True, blank=True, related_name="user_profile"
     )
 

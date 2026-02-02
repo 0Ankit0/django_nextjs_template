@@ -1,4 +1,5 @@
 import datetime
+from typing import Any
 
 from django.conf import settings
 from django.contrib import messages
@@ -25,11 +26,23 @@ class PaymentIntentSerializer(serializers.ModelSerializer):
         required=True,
         write_only=True,
     )
+    amount = serializers.SerializerMethodField()
+    currency = serializers.SerializerMethodField()
+    client_secret = serializers.SerializerMethodField()
 
     class Meta:
         model = djstripe_models.PaymentIntent
         fields = ("id", "amount", "currency", "client_secret", "product")
         read_only_fields = ("id", "amount", "currency", "client_secret")
+
+    def get_amount(self, obj):
+        return obj.stripe_data.get("amount")
+
+    def get_currency(self, obj):
+        return obj.stripe_data.get("currency")
+
+    def get_client_secret(self, obj):
+        return obj.stripe_data.get("client_secret")
 
     def create(self, validated_data):
         request = self.context["request"]
@@ -51,10 +64,15 @@ class PaymentIntentSerializer(serializers.ModelSerializer):
 
 
 class SetupIntentSerializer(serializers.ModelSerializer):
+    client_secret = serializers.SerializerMethodField()
+
     class Meta:
         model = djstripe_models.SetupIntent
         fields = ("id", "client_secret")
         read_only_fields = ("id", "client_secret")
+
+    def get_client_secret(self, obj):
+        return obj.stripe_data.get("client_secret")
 
     def create(self, validated_data):
         request = self.context["request"]
@@ -67,15 +85,23 @@ class SetupIntentSerializer(serializers.ModelSerializer):
 
 
 class PaymentMethodSerializer(serializers.ModelSerializer):
-    card = serializers.JSONField(read_only=True)
-    billing_details = serializers.JSONField(read_only=True)
+    type = serializers.SerializerMethodField()
+    card = serializers.SerializerMethodField()
+    billing_details = serializers.SerializerMethodField()
 
     class Meta:
         model = djstripe_models.PaymentMethod
         fields = ("id", "type", "card", "billing_details")
-        exclude_fields = ("id",)
         read_only_fields = fields
-        swagger_schema_fields = {"properties": {key for key in fields if key not in [1, 2, 3]}}
+
+    def get_type(self, obj):
+        return obj.stripe_data.get("type")
+
+    def get_card(self, obj):
+        return obj.stripe_data.get("card")
+
+    def get_billing_details(self, obj):
+        return obj.stripe_data.get("billing_details")
 
 
 class UpdateDefaultPaymentMethodSerializer(serializers.Serializer):
@@ -89,18 +115,29 @@ class SubscriptionItemProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Product
         fields = ("id", "name")
-        swagger_schema_fields = {"properties": {}}
+        swagger_schema_fields = {"properties": {}}  # type: ignore[var-annotated]
 
 
 class PriceSerializer(serializers.ModelSerializer):
     product = SubscriptionItemProductSerializer()
+    unit_amount = serializers.SerializerMethodField()
 
     class Meta:
         model = djstripe_models.Price
         fields = ("id", "product", "unit_amount")
 
+    def get_unit_amount(self, obj):
+        return obj.stripe_data.get("unit_amount")
+
 
 class SubscriptionSerializer(serializers.ModelSerializer):
+    status = serializers.SerializerMethodField()
+    start_date = serializers.SerializerMethodField()
+    current_period_end = serializers.SerializerMethodField()
+    current_period_start = serializers.SerializerMethodField()
+    trial_start = serializers.SerializerMethodField()
+    trial_end = serializers.SerializerMethodField()
+
     class Meta:
         model = djstripe_models.Subscription
         fields = (
@@ -112,15 +149,25 @@ class SubscriptionSerializer(serializers.ModelSerializer):
             "trial_start",
             "trial_end",
         )
-        read_only_fields = (
-            "id",
-            "status",
-            "start_date",
-            "current_period_end",
-            "current_period_start",
-            "trial_start",
-            "trial_end",
-        )
+        read_only_fields = fields
+
+    def get_status(self, obj):
+        return obj.stripe_data.get("status")
+
+    def get_start_date(self, obj):
+        return obj.stripe_data.get("start_date")
+
+    def get_current_period_end(self, obj):
+        return obj.stripe_data.get("current_period_end")
+
+    def get_current_period_start(self, obj):
+        return obj.stripe_data.get("current_period_start")
+
+    def get_trial_start(self, obj):
+        return obj.stripe_data.get("trial_start")
+
+    def get_trial_end(self, obj):
+        return obj.stripe_data.get("trial_end")
 
 
 class SubscriptionSchedulePhaseItemSerializer(serializers.Serializer):
@@ -166,7 +213,7 @@ class TenantSubscriptionScheduleSerializer(serializers.ModelSerializer):
             ],
         ),
         write_only=True,
-    )
+    )  # type: ignore[var-annotated]
 
     @swagger_serializer_method(serializer_or_field=SubscriptionSchedulePhaseSerializer(many=True))
     def get_phases(self, obj):
@@ -218,9 +265,9 @@ class TenantSubscriptionScheduleSerializer(serializers.ModelSerializer):
         if subscriptions.is_current_schedule_phase_plan(schedule=instance, plan_config=constants.FREE_PLAN):
             current_phase["end_date"] = "now"
 
-        next_phase = {"items": [{"price": price.id}]}
+        next_phase: dict[str, Any] = {"items": [{"price": price.id}]}
         if can_activate_trial:
-            next_phase["trial_end"] = timezone.now() + timezone.timedelta(settings.SUBSCRIPTION_TRIAL_PERIOD_DAYS)
+            next_phase["trial_end"] = timezone.now() + datetime.timedelta(days=settings.SUBSCRIPTION_TRIAL_PERIOD_DAYS)
 
         updated_phases = [current_phase]
         if next_phase:
@@ -319,16 +366,25 @@ class TenantChargeInvoiceItemSerializer(serializers.ModelSerializer):
 
 class TenantChargeInvoiceSerializer(serializers.ModelSerializer):
     items = TenantChargeInvoiceItemSerializer(source="invoiceitems", many=True)
+    billing_reason = serializers.SerializerMethodField()
 
     class Meta:
         model = djstripe_models.Invoice
         fields = ("id", "billing_reason", "items")
 
+    def get_billing_reason(self, obj):
+        return obj.stripe_data.get("billing_reason")
+
 
 class TenantChargeSerializer(serializers.ModelSerializer):
     invoice = TenantChargeInvoiceSerializer()
-    billing_details = serializers.JSONField(read_only=True)
-    payment_method_details = serializers.JSONField(read_only=True)
+    amount = serializers.SerializerMethodField()
+    billing_details = serializers.SerializerMethodField()
+    currency = serializers.SerializerMethodField()
+    captured = serializers.SerializerMethodField()
+    paid = serializers.SerializerMethodField()
+    payment_method_details = serializers.SerializerMethodField()
+    status = serializers.SerializerMethodField()
 
     class Meta:
         model = djstripe_models.Charge
@@ -344,3 +400,24 @@ class TenantChargeSerializer(serializers.ModelSerializer):
             "status",
             "invoice",
         )
+
+    def get_amount(self, obj):
+        return obj.stripe_data.get("amount")
+
+    def get_billing_details(self, obj):
+        return obj.stripe_data.get("billing_details")
+
+    def get_currency(self, obj):
+        return obj.stripe_data.get("currency")
+
+    def get_captured(self, obj):
+        return obj.stripe_data.get("captured")
+
+    def get_paid(self, obj):
+        return obj.stripe_data.get("paid")
+
+    def get_payment_method_details(self, obj):
+        return obj.stripe_data.get("payment_method_details")
+
+    def get_status(self, obj):
+        return obj.stripe_data.get("status")

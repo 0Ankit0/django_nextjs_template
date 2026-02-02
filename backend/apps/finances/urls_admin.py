@@ -2,6 +2,8 @@ from django.urls import include, path
 
 from . import views_admin
 
+app_name = "finances_admin"
+
 stripe_urls = [
     path(r"payment-intent/<str:pk>/refund/", views_admin.AdminRefundView.as_view(), name="payment-intent-refund"),
 ]
