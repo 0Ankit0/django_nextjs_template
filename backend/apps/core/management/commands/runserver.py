@@ -1,92 +1,71 @@
+import atexit
 import os
-import platform
+import signal
 import subprocess
 
 from django.conf import settings
-from django.contrib.staticfiles.management.commands.runserver import Command as RunserverCommand
+from django.core.management.commands.runserver import Command as RunserverCommand
 
 
 class Command(RunserverCommand):
-    help = "Starts the Django development server and the Next.js frontend in a separate terminal."
-
-    # Track the macOS terminal window/tab to close it on exit
-    frontend_process_info = None
+    frontend_process = None
 
     def handle(self, *args, **options):
-        # Only start frontend in the main process (not reloader)
-        if os.environ.get("RUN_MAIN") != "true":
+        # CRITICAL: Only start in the parent process, NOT in the reloader child
+        # When RUN_MAIN is "true", we're in the reloader child process
+        is_reloader_child = os.environ.get("RUN_MAIN") == "true"
+
+        if not is_reloader_child:
             self.start_frontend()
+            # Ensure cleanup happens even on crash/exit
+            atexit.register(self.stop_frontend)
+            # Handle Ctrl+C properly
+            signal.signal(signal.SIGINT, self._signal_handler)
+            signal.signal(signal.SIGTERM, self._signal_handler)
 
         try:
             super().handle(*args, **options)
         finally:
-            # This block runs when Ctrl+C is pressed (KeyboardInterrupt)
-            # But ONLY in the process catching it.
-            # Note: handle() is called in both main and reloader processes.
-            # We only want to clean up if we are the one who started it?
-            # Actually, typically prompt returns, and variables are lost.
-            # But the main process stays alive waiting for the reloader thread/process?
-            # No, 'runserver' runs indefinitely.
-
-            if os.environ.get("RUN_MAIN") != "true" and self.frontend_process_info:
+            # Cleanup when server stops
+            if not is_reloader_child:
                 self.stop_frontend()
 
     def start_frontend(self):
-        self.stdout.write(self.style.SUCCESS("Starting Next.js frontend in a new terminal..."))
+        """Start the frontend dev server."""
+        self.stdout.write(self.style.SUCCESS("Starting frontend (npm run dev)..."))
 
-        frontend_dir = settings.BASE_DIR.parent / "frontend"
-        command = f"cd {frontend_dir} && npm run dev"
-        system = platform.system()
+        # Get the project root (parent of backend directory)
+        frontend_dir = os.path.join(os.path.dirname(settings.BASE_DIR), "frontend")
 
-        try:
-            if system == "Darwin":
-                # Simplified AppleScript to just get the window ID of the new script
-                # 'do script' creates a new window by default if no target is specified
-                script = f"""
-                tell application "Terminal"
-                    do script "{command}"
-                    set winId to id of front window
-                    return winId
-                end tell
-                """
-                process = subprocess.Popen(
-                    ["osascript", "-e", script], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
-                )
-                stdout, stderr = process.communicate()
-
-                if process.returncode == 0:
-                    window_id = stdout.strip()
-                    self.frontend_process_info = {"type": "macos_window", "id": window_id}
-                    self.stdout.write(f"Frontend started in Terminal Window ID: {window_id}")
-                else:
-                    self.stdout.write(self.style.WARNING(f"Failed to capture frontend terminal: {stderr}"))
-
-            # Linux/Windows implementations remain similar but hard to track cleanup without PIDs
-            elif system == "Linux":
-                # Simplified for Linux
-                subprocess.Popen(["gnome-terminal", "--", "bash", "-c", f"{command}; exec bash"])
-
-            elif system == "Windows":
-                subprocess.Popen(f'start cmd /k "{command}"', shell=True)
-
-        except Exception as e:
-            self.stdout.write(self.style.WARNING(f"Failed to start frontend: {e}"))
+        # Use shell=True on Windows if needed, but list args are safer on Unix
+        # npm start or npm run dev depending on your package.json scripts
+        self.frontend_process = subprocess.Popen(
+            ["npm", "run", "dev"],
+            cwd=frontend_dir,
+            stdin=subprocess.DEVNULL,
+            # Optional: pipe output to avoid mixing with Django logs in the same terminal
+            # stdout=subprocess.DEVNULL,
+            # stderr=subprocess.DEVNULL,
+        )
 
     def stop_frontend(self):
-        self.stdout.write(self.style.SUCCESS("Stopping frontend terminal..."))
-        if not self.frontend_process_info:
-            return
+        """Stop the frontend dev server."""
+        if self.frontend_process and self.frontend_process.poll() is None:
+            self.stdout.write(self.style.WARNING("Stopping frontend..."))
 
-        try:
-            if self.frontend_process_info["type"] == "macos_window":
-                window_id = self.frontend_process_info["id"]
-                # AppleScript to close the specific window
-                close_script = f"""
-                tell application "Terminal"
-                    close window id {window_id}
-                end tell
-                """
-                subprocess.run(["osascript", "-e", close_script], check=False)
+            # Terminate gracefully first
+            self.frontend_process.terminate()
 
-        except Exception as e:
-            self.stdout.write(self.style.WARNING(f"Failed to stop frontend: {e}"))
+            try:
+                # Wait up to 5 seconds for graceful shutdown
+                self.frontend_process.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                # Force kill if it doesn't stop
+                self.frontend_process.kill()
+                self.frontend_process.wait()
+
+    def _signal_handler(self, signum, frame):
+        """Handle Ctrl+C and kill signals."""
+        self.stop_frontend()
+        # Re-raise KeyboardInterrupt so Django's runserver exits cleanly
+        raise KeyboardInterrupt
