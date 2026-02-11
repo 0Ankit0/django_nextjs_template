@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 @shared_task
-def send_email_task(to_email: str, subject: str, template_name: str, context: dict = None):
+def send_email_task(to_email: str, subject: str, template_name: str, context: dict | None = None):
     """Send an email using a template."""
     context = context or {}
 
@@ -76,7 +76,7 @@ def send_password_reset_email(user_id: int, reset_token: str):
 @shared_task
 def send_tenant_invitation_email(invitation_id: int):
     """Send tenant invitation email."""
-    from multitenancy.models import TenantInvitation
+    from multitenancy.models import TenantInvitation  # type: ignore[attr-defined]
 
     try:
         invitation = TenantInvitation.objects.select_related("tenant", "invited_by").get(id=invitation_id)

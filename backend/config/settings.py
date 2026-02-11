@@ -119,6 +119,7 @@ MIDDLEWARE = [
     "multitenancy.middleware.TenantMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django_browser_reload.middleware.BrowserReloadMiddleware",
     "django_hosts.middleware.HostsResponseMiddleware",
     "social_django.middleware.SocialAuthExceptionMiddleware",
 ]

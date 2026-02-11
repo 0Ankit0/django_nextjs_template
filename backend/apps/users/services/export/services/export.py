@@ -25,14 +25,14 @@ class CrudDemoItemDataExport(UserDataExportable):
                     "name": item.name,
                 }
             )
-            for item in user.cruddemoitem_set.all()
+            for item in user.cruddemoitem_set.all()  # type: ignore[attr-defined]
         ]
 
 
 class DocumentDemoItemFileExport(UserFilesExportable):
     @classmethod
     def export(cls, user: User) -> list[str]:
-        return [document.file.name for document in user.documents.all()]
+        return [document.file.name for document in user.documents.all()]  # type: ignore[attr-defined]
 
 
 class UserDataExport(UserDataExportable):
@@ -44,9 +44,9 @@ class UserDataExport(UserDataExportable):
         user_data = {
             "id": hashid.encode(user.id),
             "profile": {
-                "id": user.profile.id,
-                "first_name": user.profile.first_name,
-                "last_name": user.profile.last_name,
+                "id": user.profile.id,  # type: ignore[attr-defined]
+                "first_name": user.profile.first_name,  # type: ignore[attr-defined]
+                "last_name": user.profile.last_name,  # type: ignore[attr-defined]
             },
             "email": user.email,
             "is_superuser": user.is_superuser,
@@ -59,7 +59,7 @@ class UserDataExport(UserDataExportable):
 
 
 class ExportUserArchive:
-    _DATA_EXPORTS: list[UserDataExportable] = [UserDataExport, CrudDemoItemDataExport]
+    _DATA_EXPORTS: list[UserDataExportable] = [UserDataExport, CrudDemoItemDataExport]  # type: ignore[list-item]
     _FILES_EXPORTS: list[UserFilesExportable] = [DocumentDemoItemFileExport]
 
     def __init__(self, user: User):
@@ -104,7 +104,7 @@ class ExportUserArchive:
 
             for file_path in user_files:
                 with io.BytesIO() as buffer:
-                    s3.download_fileobj(settings.AWS_STORAGE_BUCKET_NAME, file_path.name, buffer)
+                    s3.download_fileobj(settings.AWS_STORAGE_BUCKET_NAME, file_path, buffer)
                     zf.writestr(f"{self._user_id}/{file_path}", buffer.getvalue())
 
         return archive_filename

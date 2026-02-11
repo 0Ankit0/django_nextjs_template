@@ -7,8 +7,8 @@ class UserDataExportEmailBaseSerializer(serializers.Serializer):
 
 
 class UserDataExportEmailSerializer(serializers.Serializer):
-    data = UserDataExportEmailBaseSerializer()
+    data = UserDataExportEmailBaseSerializer()  # type: ignore[assignment]
 
 
 class AdminDataExportEmailSerializer(serializers.Serializer):
-    data = UserDataExportEmailBaseSerializer(many=True)
+    data = UserDataExportEmailBaseSerializer(many=True)  # type: ignore[assignment]

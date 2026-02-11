@@ -9,10 +9,10 @@ class DataExportEmail(emails.Email):
 
 
 class UserDataExportEmail(DataExportEmail):
-    name = constants.UserEmails.USER_EXPORT
-    serializer_class = email_serializers.UserDataExportEmailSerializer
+    name = constants.UserEmails.USER_EXPORT  # type: ignore[assignment]
+    serializer_class = email_serializers.UserDataExportEmailSerializer  # type: ignore[assignment]
 
 
 class AdminDataExportEmail(DataExportEmail):
-    name = constants.UserEmails.USER_EXPORT_ADMIN
-    serializer_class = email_serializers.AdminDataExportEmailSerializer
+    name = constants.UserEmails.USER_EXPORT_ADMIN  # type: ignore[assignment]
+    serializer_class = email_serializers.AdminDataExportEmailSerializer  # type: ignore[assignment]

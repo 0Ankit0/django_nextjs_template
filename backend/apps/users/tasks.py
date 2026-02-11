@@ -1,15 +1,19 @@
 import importlib
+from typing import TYPE_CHECKING
 
 from celery import shared_task
 from django.conf import settings
 
 from .services.export.services import user as user_services
 
+if TYPE_CHECKING:
+    pass
+
 module_name, package = settings.LAMBDA_TASKS_BASE_HANDLER.rsplit(".", maxsplit=1)
 LambdaTask = getattr(importlib.import_module(module_name), package)
 
 
-class ExportUserData(LambdaTask):
+class ExportUserData(LambdaTask):  # type: ignore[valid-type,misc]
     def __init__(self):
         super().__init__(name="EXPORT_USER_DATA", source="backend.export_user")
 

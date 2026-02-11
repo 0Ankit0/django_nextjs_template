@@ -53,7 +53,7 @@ class BalanceTransactionFactory(factory.django.DjangoModelFactory):
     available_on = factory.Faker("future_datetime", tzinfo=timezone.get_current_timezone())
     currency = "usd"
     fee = 0
-    fee_details = {}
+    fee_details: dict = {}
     net = factory.LazyAttribute(lambda obj: obj.amount)
     source = factory.Faker("pystr")
     reporting_category = enums.BalanceTransactionReportingCategory.charge

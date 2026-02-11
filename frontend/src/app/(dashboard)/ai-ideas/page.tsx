@@ -5,7 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/componen
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sparkles, Loader2, Copy, CheckCircle } from 'lucide-react';
-import apiClient from '@/lib/api-client';
+import { apiClient } from '@/lib/api-client';
 
 interface SaasIdea {
   id: string;

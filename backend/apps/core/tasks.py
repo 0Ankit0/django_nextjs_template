@@ -36,7 +36,7 @@ class LambdaTask:
             data=data, source=self.source, detail_type=self.name, event_bus_name=self.event_bus_name
         )
 
-    def apply(self, data: dict, due_date: datetime = None):
+    def apply(self, data: dict, due_date: datetime | None = None):
         task_entry = self.get_entry(data)
 
         if due_date is not None:
@@ -59,7 +59,7 @@ class LambdaTask:
 
 
 class LambdaTaskLocalInvoke(LambdaTask):
-    def apply(self, data: dict, due_date: datetime = None):
+    def apply(self, data: dict, due_date: datetime | None = None):
         if due_date is None:
             due_date = datetime.now(tz=UTC)
 

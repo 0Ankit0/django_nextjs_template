@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 @shared_task
-def create_notification(user_id: int, notification_type: str, data: dict = None):
+def create_notification(user_id: int, notification_type: str, data: dict | None = None):
     """Create a notification and send it via WebSocket."""
     from notifications.models import Notification
 
@@ -64,7 +64,7 @@ def send_scheduled_notifications():
 
 
 @shared_task
-def broadcast_notification(notification_type: str, data: dict = None, tenant_id: str = None):
+def broadcast_notification(notification_type: str, data: dict | None = None, tenant_id: str | None = None):
     """Broadcast a notification to all users or all users in a tenant."""
     from multitenancy.models import TenantMembership
     from users.models import User

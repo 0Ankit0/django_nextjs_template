@@ -31,21 +31,26 @@ class Command(RunserverCommand):
                 self.stop_frontend()
 
     def start_frontend(self):
-        """Start the frontend dev server."""
-        self.stdout.write(self.style.SUCCESS("Starting frontend (npm run dev)..."))
+        """Start the frontend dev server in a separate terminal window."""
+        self.stdout.write(self.style.SUCCESS("Starting frontend in new terminal..."))
 
         # Get the project root (parent of backend directory)
         frontend_dir = os.path.join(os.path.dirname(settings.BASE_DIR), "frontend")
 
-        # Use shell=True on Windows if needed, but list args are safer on Unix
-        # npm start or npm run dev depending on your package.json scripts
+        # Open frontend in a new macOS Terminal tab
+        # This prevents the reload events from interfering with Django
+        applescript = f"""
+        tell application "Terminal"
+            do script "cd {frontend_dir} && npm run dev"
+            activate
+        end tell
+        """
+
         self.frontend_process = subprocess.Popen(
-            ["npm", "run", "dev"],
-            cwd=frontend_dir,
+            ["osascript", "-e", applescript],
             stdin=subprocess.DEVNULL,
-            # Optional: pipe output to avoid mixing with Django logs in the same terminal
-            # stdout=subprocess.DEVNULL,
-            # stderr=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
         )
 
     def stop_frontend(self):
@@ -63,6 +68,14 @@ class Command(RunserverCommand):
                 # Force kill if it doesn't stop
                 self.frontend_process.kill()
                 self.frontend_process.wait()
+
+        try:
+            # More reliable way to kill the process on port 3000 (Next.js)
+            # This handles cases where the terminal window closes but the process remains
+            cmd = "lsof -ti:3000 | xargs kill -9"
+            subprocess.run(cmd, shell=True, stderr=subprocess.DEVNULL, stdout=subprocess.DEVNULL)
+        except Exception:
+            pass  # Ignore errors during cleanup, e.g. if nothing is running
 
     def _signal_handler(self, signum, frame):
         """Handle Ctrl+C and kill signals."""
